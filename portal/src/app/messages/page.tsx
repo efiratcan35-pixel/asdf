@@ -55,10 +55,12 @@ export default function MessagesPage() {
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const params = new URLSearchParams(window.location.search);
-    const pid = Number(params.get('projectId') ?? '');
-    const oid = Number(params.get('otherUserId') ?? '');
-    setDesiredProjectId(Number.isFinite(pid) ? pid : null);
-    setDesiredOtherUserId(Number.isFinite(oid) ? oid : null);
+    const pidRaw = params.get('projectId');
+    const oidRaw = params.get('otherUserId');
+    const pid = pidRaw ? Number(pidRaw) : NaN;
+    const oid = oidRaw ? Number(oidRaw) : NaN;
+    setDesiredProjectId(Number.isInteger(pid) && pid > 0 ? pid : null);
+    setDesiredOtherUserId(Number.isInteger(oid) && oid > 0 ? oid : null);
   }, []);
 
   async function loadConversations() {
@@ -77,7 +79,9 @@ export default function MessagesPage() {
         desiredProjectId !== null &&
         desiredOtherUserId !== null &&
         Number.isInteger(desiredProjectId) &&
-        Number.isInteger(desiredOtherUserId)
+        Number.isInteger(desiredOtherUserId) &&
+        desiredProjectId > 0 &&
+        desiredOtherUserId > 0
       ) {
         const matched = list.find(
           (it) => it.projectId === desiredProjectId && it.otherUserId === desiredOtherUserId,
@@ -111,8 +115,12 @@ export default function MessagesPage() {
     setChatLoading(true);
     setError(null);
     try {
+      const endpoint =
+        item.projectId === null
+          ? `${API_BASE}/messages/user/${item.otherUserId}`
+          : `${API_BASE}/messages/project/${item.projectId}/user/${item.otherUserId}`;
       const res = await fetch(
-        `${API_BASE}/messages/project/${item.projectId}/user/${item.otherUserId}`,
+        endpoint,
         { headers: { Authorization: `Bearer ${token}` } },
       );
       const data = await res.json().catch(() => ([]));
