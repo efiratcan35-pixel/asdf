@@ -49,6 +49,7 @@ export default function MessagesPage() {
   const [error, setError] = useState<string | null>(null);
   const [desiredProjectId, setDesiredProjectId] = useState<number | null>(null);
   const [desiredOtherUserId, setDesiredOtherUserId] = useState<number | null>(null);
+  const [prefillConsumed, setPrefillConsumed] = useState(false);
 
   const canUse = useMemo(() => Boolean(user), [user]);
 
@@ -76,6 +77,7 @@ export default function MessagesPage() {
       const list = Array.isArray(data) ? (data as ConversationItem[]) : [];
       setItems(list);
       if (
+        !prefillConsumed &&
         desiredProjectId !== null &&
         desiredOtherUserId !== null &&
         Number.isInteger(desiredProjectId) &&
@@ -100,6 +102,7 @@ export default function MessagesPage() {
             unreadCount: 0,
           });
         }
+        setPrefillConsumed(true);
       } else if (!selected && list.length > 0) {
         setSelected(list[0]);
       }
@@ -137,7 +140,7 @@ export default function MessagesPage() {
     if (!token || !canUse) return;
     loadConversations();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token, canUse, desiredProjectId, desiredOtherUserId]);
+  }, [token, canUse, desiredProjectId, desiredOtherUserId, prefillConsumed]);
 
   useEffect(() => {
     if (!selected) {
