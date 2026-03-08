@@ -517,11 +517,11 @@ export default function InvestorDashboardPage() {
   return (
     <div className="min-h-screen bg-gray-100">
       <TopBar />
-      <main className="mx-auto max-w-7xl p-6 space-y-6">
-        <section className="rounded-xl border bg-white p-6 shadow-sm">
-          <div className="flex items-center justify-between gap-3">
+      <main className="mx-auto max-w-7xl p-3 sm:p-6 space-y-6">
+        <section className="rounded-xl border bg-white p-4 sm:p-6 shadow-sm overflow-hidden">
+          <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
             <h1 className="text-2xl font-semibold">Projelerim</h1>
-            <Link href="/dashboard/investor/projects/new" className="rounded-md border px-3 py-1.5 text-sm hover:bg-gray-50">
+            <Link href="/dashboard/investor/projects/new" className="w-full rounded-md border px-3 py-1.5 text-sm hover:bg-gray-50 sm:w-auto">
               Yeni Proje Ekle
             </Link>
           </div>
@@ -741,13 +741,13 @@ export default function InvestorDashboardPage() {
         <section className="space-y-4">
           {loading && <div className="text-sm text-gray-500">Projeler yukleniyor...</div>}
           {projects.map((p) => (
-            <article key={p.id} className="rounded-xl border bg-white p-4 shadow-sm">
-              <div className="flex items-start justify-between gap-3">
+            <article key={p.id} className="rounded-xl border bg-white p-4 shadow-sm overflow-hidden">
+              <div className="flex flex-col items-start justify-between gap-3 sm:flex-row">
                 <div>
                   <h2 className="text-lg font-semibold">{p.name ?? `Proje ${p.id}`}</h2>
                   <div className="mt-1 text-sm text-gray-600">Butce: {formatTry(p.budgetTry ?? null)}</div>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
                   <button
                     type="button"
                     className="cursor-pointer rounded border px-3 py-1 text-xs"
