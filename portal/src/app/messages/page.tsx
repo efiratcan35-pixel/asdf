@@ -1,7 +1,6 @@
 'use client';
 
 import { FormEvent, useEffect, useMemo, useState } from 'react';
-import { useSearchParams } from 'next/navigation';
 import TopBar from '@/components/TopBar';
 import { useAuth } from '@/lib/auth';
 
@@ -40,7 +39,6 @@ function formatDateTime(v: string) {
 }
 
 export default function MessagesPage() {
-  const searchParams = useSearchParams();
   const { token, user } = useAuth();
   const [items, setItems] = useState<ConversationItem[]>([]);
   const [selected, setSelected] = useState<ConversationItem | null>(null);
@@ -49,10 +47,19 @@ export default function MessagesPage() {
   const [loading, setLoading] = useState(false);
   const [chatLoading, setChatLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [desiredProjectId, setDesiredProjectId] = useState<number | null>(null);
+  const [desiredOtherUserId, setDesiredOtherUserId] = useState<number | null>(null);
 
   const canUse = useMemo(() => Boolean(user), [user]);
-  const desiredProjectId = Number(searchParams.get('projectId') ?? '');
-  const desiredOtherUserId = Number(searchParams.get('otherUserId') ?? '');
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const params = new URLSearchParams(window.location.search);
+    const pid = Number(params.get('projectId') ?? '');
+    const oid = Number(params.get('otherUserId') ?? '');
+    setDesiredProjectId(Number.isFinite(pid) ? pid : null);
+    setDesiredOtherUserId(Number.isFinite(oid) ? oid : null);
+  }, []);
 
   async function loadConversations() {
     if (!token) return;
@@ -66,7 +73,12 @@ export default function MessagesPage() {
       if (!res.ok) throw new Error(data?.message ?? 'Mesajlar getirilemedi');
       const list = Array.isArray(data) ? (data as ConversationItem[]) : [];
       setItems(list);
-      if (Number.isInteger(desiredProjectId) && Number.isInteger(desiredOtherUserId)) {
+      if (
+        desiredProjectId !== null &&
+        desiredOtherUserId !== null &&
+        Number.isInteger(desiredProjectId) &&
+        Number.isInteger(desiredOtherUserId)
+      ) {
         const matched = list.find(
           (it) => it.projectId === desiredProjectId && it.otherUserId === desiredOtherUserId,
         );
