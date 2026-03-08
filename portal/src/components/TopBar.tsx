@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
@@ -25,9 +25,7 @@ export default function TopBar() {
           : '/dashboard';
 
   useEffect(() => {
-    if (!user || !token) {
-      return;
-    }
+    if (!user || !token) return;
 
     let cancelled = false;
     const fetchUnread = async () => {
@@ -36,7 +34,7 @@ export default function TopBar() {
           fetch(`${API_BASE}/messages/unread-count`, {
             headers: { Authorization: `Bearer ${token}` },
           }),
-          user?.role === 'investor'
+          user.role === 'investor'
             ? fetch(`${API_BASE}/projects/offers/notifications/summary`, {
                 headers: { Authorization: `Bearer ${token}` },
               })
@@ -75,43 +73,35 @@ export default function TopBar() {
         <div className="flex w-full flex-wrap items-center gap-1 sm:w-auto sm:gap-2">
           {!user && !isAuthPage && (
             <>
-              <Link
-                href="/login"
-                className="rounded-md border px-2 py-1 text-xs hover:bg-gray-50 sm:px-3 sm:py-1.5 sm:text-sm"
-              >
-                Giriş Yap
+              <Link href="/login" className="rounded-md border px-3 py-1.5 text-sm hover:bg-gray-50">
+                Giris Yap
               </Link>
-              <Link
-                href="/register"
-                className="rounded-md bg-black px-2 py-1 text-xs text-white hover:opacity-90 sm:px-3 sm:py-1.5 sm:text-sm"
-              >
-                Üye Ol
+              <Link href="/register" className="rounded-md bg-black px-3 py-1.5 text-sm text-white hover:opacity-90">
+                Uye Ol
               </Link>
             </>
           )}
 
           {!user && isAuthPage && (
-            <Link
-              href="/"
-              className="rounded-md border px-2 py-1 text-xs hover:bg-gray-50 sm:px-3 sm:py-1.5 sm:text-sm"
-            >
-              Configurator’a dön
+            <Link href="/" className="rounded-md border px-3 py-1.5 text-sm hover:bg-gray-50">
+              Configurator'a don
             </Link>
           )}
 
           {user && (
             <>
-              <span className="hidden sm:inline text-xs text-gray-600">
-                {user.email} • {user.role}
-              </span>
+              <span className="hidden text-xs text-gray-600 sm:inline">{user.email} • {user.role}</span>
+
               <Link href={dashboardHref} className="rounded-md border px-2 py-1 text-xs hover:bg-gray-50 sm:px-3 sm:py-1.5 sm:text-sm">
                 {user.role === 'investor' ? 'Profil' : 'Dashboard'}
               </Link>
+
               {user.role === 'investor' && (
                 <Link href="/dashboard/investor/projects" className="rounded-md border px-2 py-1 text-xs hover:bg-gray-50 sm:px-3 sm:py-1.5 sm:text-sm">
                   Projelerim
                 </Link>
               )}
+
               {user.role === 'investor' && (
                 <button
                   type="button"
@@ -138,18 +128,21 @@ export default function TopBar() {
                   )}
                 </button>
               )}
+
               {user.role === 'investor' && (
                 <Link href="/market-suppliers" className="rounded-md border px-2 py-1 text-xs hover:bg-gray-50 sm:px-3 sm:py-1.5 sm:text-sm">
                   <span className="sm:hidden">Firmalar</span>
                   <span className="hidden sm:inline">Piyasadaki Firmalar / Ekipler</span>
                 </Link>
               )}
+
               {user.role === 'contractor' && (
                 <Link href="/market-jobs" className="rounded-md border px-2 py-1 text-xs hover:bg-gray-50 sm:px-3 sm:py-1.5 sm:text-sm">
                   <span className="sm:hidden">Isler</span>
                   <span className="hidden sm:inline">Piyasadaki Isler</span>
                 </Link>
               )}
+
               <Link
                 href="/messages"
                 className={`rounded-md border px-2 py-1 text-xs hover:bg-gray-50 sm:px-3 sm:py-1.5 sm:text-sm ${
@@ -160,11 +153,13 @@ export default function TopBar() {
                 <span className="hidden sm:inline">Mesajlarim {unreadCount > 0 ? `(${unreadCount} yeni)` : ''}</span>
                 <span className="ml-1 sm:hidden">{unreadCount > 0 ? `(${unreadCount})` : ''}</span>
               </Link>
+
               {user.role === 'contractor' && (
                 <Link href="/my-offers" className="rounded-md border px-2 py-1 text-xs hover:bg-gray-50 sm:px-3 sm:py-1.5 sm:text-sm">
                   Tekliflerim
                 </Link>
               )}
+
               <Link
                 href="/user-settings"
                 title="Kullanici Islemleri"
@@ -173,6 +168,7 @@ export default function TopBar() {
               >
                 ⚙
               </Link>
+
               <button
                 onClick={() => {
                   logout();
@@ -180,7 +176,7 @@ export default function TopBar() {
                 }}
                 className="rounded-md bg-black px-2 py-1 text-xs text-white hover:opacity-90 sm:px-3 sm:py-1.5 sm:text-sm"
               >
-                Çıkış
+                Cikis
               </button>
             </>
           )}
@@ -189,4 +185,3 @@ export default function TopBar() {
     </div>
   );
 }
-

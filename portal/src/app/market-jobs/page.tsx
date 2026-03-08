@@ -236,8 +236,8 @@ export default function MarketJobsPage() {
   return (
     <div className="min-h-screen bg-gray-100">
       <TopBar />
-      <main className="mx-auto max-w-7xl p-6 space-y-4">
-        <section className="rounded-xl border bg-white p-6 shadow-sm">
+      <main className="mx-auto max-w-7xl p-3 sm:p-6 space-y-4">
+        <section className="rounded-xl border bg-white p-4 sm:p-6 shadow-sm">
           <h1 className="text-2xl font-semibold">Piyasadaki Isler</h1>
           <p className="mt-1 text-sm text-gray-600">Investorlarin girdigi projeler burada listelenir.</p>
         </section>
@@ -317,7 +317,7 @@ export default function MarketJobsPage() {
         </section>
 
         {chatProject && (
-          <aside className="fixed right-4 top-24 z-50 w-[360px] rounded-lg border bg-white p-3 shadow-xl">
+          <aside className="fixed right-2 top-20 z-50 w-[calc(100vw-1rem)] max-w-[360px] rounded-lg border bg-white p-3 shadow-xl">
             <div className="mb-2 flex items-center justify-between">
               <div>
                 <div className="text-sm font-semibold">Yatirimci ile sohbet</div>
@@ -343,7 +343,7 @@ export default function MarketJobsPage() {
               </div>
             )}
 
-            <div className="h-64 overflow-y-auto rounded border p-2">
+            <div className="h-56 sm:h-64 overflow-y-auto rounded border p-2">
               {chatLoading ? (
                 <div className="text-xs text-gray-500">Yukleniyor...</div>
               ) : (
@@ -390,7 +390,7 @@ export default function MarketJobsPage() {
         )}
 
         {offerProject && (
-          <aside className="fixed left-1/2 top-28 z-50 w-[420px] -translate-x-1/2 rounded-lg border bg-white p-4 shadow-xl">
+          <aside className="fixed left-1/2 top-20 z-50 w-[calc(100vw-1rem)] max-w-[420px] -translate-x-1/2 rounded-lg border bg-white p-3 sm:p-4 shadow-xl">
             <div className="mb-3 flex items-start justify-between gap-3">
               <div>
                 <div className="text-sm font-semibold">Teklif Ver</div>
@@ -426,7 +426,7 @@ export default function MarketJobsPage() {
               </div>
             </div>
 
-            <div className="mt-3 flex items-center gap-2">
+            <div className="mt-3 flex flex-wrap items-center gap-2">
               <button
                 type="button"
                 className="rounded bg-black px-3 py-1.5 text-xs text-white disabled:opacity-60"

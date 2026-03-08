@@ -261,7 +261,7 @@ export default function MarketJobDetailPage() {
         </section>
 
         {chatOpen && project && (
-          <aside className="fixed right-4 top-24 z-50 w-[360px] rounded-lg border bg-white p-3 shadow-xl">
+          <aside className="fixed right-2 top-20 z-50 w-[calc(100vw-1rem)] max-w-[360px] rounded-lg border bg-white p-3 shadow-xl">
             <div className="mb-2 flex items-center justify-between">
               <div>
                 <div className="text-sm font-semibold">Yatirimci ile sohbet</div>
