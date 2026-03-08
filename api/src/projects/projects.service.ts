@@ -300,6 +300,7 @@ export class ProjectsService {
           lengthM: enriched.lengthM,
           widthM: enriched.widthM,
           heightM: enriched.heightM,
+          photos: (enriched.photos ?? []).slice(0, 2),
           createdAt: enriched.createdAt,
         };
       });

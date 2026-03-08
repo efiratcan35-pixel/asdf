@@ -6,6 +6,7 @@ import { useEffect, useMemo, useState } from 'react';
 import * as THREE from 'three';
 import TopBar from '@/components/TopBar';
 import { useAuth } from '@/lib/auth';
+import Link from 'next/link';
 
 type BuildingType = 'STEEL_FULL' | 'RC_COL_STEEL_ROOF' | 'RC_FULL_PRECAST';
 type Vec3 = [number, number, number];
@@ -36,6 +37,7 @@ type ProjectItem = {
   lengthM: number;
   widthM: number;
   heightM: number;
+  photos?: { id: number; url: string; caption?: string | null }[];
   createdAt: string;
 };
 
@@ -57,6 +59,10 @@ function formatTry(value: number) {
 
 function formatNum(value: number) {
   return new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 2 }).format(value);
+}
+
+function toApiUrl(path: string) {
+  return path.startsWith('http://') || path.startsWith('https://') ? path : `${API_BASE}${path}`;
 }
 
 function clamp(value: number, min: number, max: number) {
@@ -674,9 +680,25 @@ export default function HomePage() {
                   <div>Henuz proje yok.</div>
                 ) : (
                   marketPreviewProjects.map((p) => (
-                    <div key={p.id} className="rounded border bg-white px-2 py-1">
-                      {p.name ?? `Proje ${p.id}`}
-                    </div>
+                    <Link
+                      key={p.id}
+                      href={`/public-projects/${p.id}`}
+                      className="flex items-center justify-between gap-2 rounded border bg-white px-2 py-1 hover:bg-gray-50"
+                    >
+                      <span className="truncate">{p.name ?? `Proje ${p.id}`}</span>
+                      {(p.photos ?? []).length > 0 && (
+                        <span className="flex gap-1">
+                          {(p.photos ?? []).slice(0, 2).map((ph) => (
+                            <img
+                              key={ph.id}
+                              src={toApiUrl(ph.url)}
+                              alt={ph.caption ?? 'Proje'}
+                              className="h-7 w-7 rounded border object-cover"
+                            />
+                          ))}
+                        </span>
+                      )}
+                    </Link>
                   ))
                 )}
               </div>

@@ -1,4 +1,4 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller, Get, Param, Query } from '@nestjs/common';
 import { ProjectsService } from './projects.service';
 
 @Controller('public/projects')
@@ -8,5 +8,10 @@ export class ProjectsPublicController {
   @Get('market-preview')
   marketPreview(@Query('limit') limit?: string) {
     return this.projectsService.findMarketPreview(Number(limit ?? 3));
+  }
+
+  @Get('market/:id')
+  marketById(@Param('id') id: string) {
+    return this.projectsService.findMarketById(Number(id));
   }
 }
