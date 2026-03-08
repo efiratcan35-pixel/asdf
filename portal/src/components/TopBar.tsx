@@ -67,23 +67,23 @@ export default function TopBar() {
 
   return (
     <div className="sticky top-0 z-50 border-b bg-white/90 backdrop-blur">
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
+      <div className="mx-auto flex max-w-7xl flex-col gap-2 px-3 py-2 sm:flex-row sm:items-center sm:justify-between sm:px-4 sm:py-3">
         <Link href="/" className="font-semibold">
           EFC Portal
         </Link>
 
-        <div className="flex items-center gap-2">
+        <div className="flex w-full flex-wrap items-center gap-1 sm:w-auto sm:gap-2">
           {!user && !isAuthPage && (
             <>
               <Link
                 href="/login"
-                className="rounded-md border px-3 py-1.5 text-sm hover:bg-gray-50"
+                className="rounded-md border px-2 py-1 text-xs hover:bg-gray-50 sm:px-3 sm:py-1.5 sm:text-sm"
               >
                 Giriş Yap
               </Link>
               <Link
                 href="/register"
-                className="rounded-md bg-black px-3 py-1.5 text-sm text-white hover:opacity-90"
+                className="rounded-md bg-black px-2 py-1 text-xs text-white hover:opacity-90 sm:px-3 sm:py-1.5 sm:text-sm"
               >
                 Üye Ol
               </Link>
@@ -93,7 +93,7 @@ export default function TopBar() {
           {!user && isAuthPage && (
             <Link
               href="/"
-              className="rounded-md border px-3 py-1.5 text-sm hover:bg-gray-50"
+              className="rounded-md border px-2 py-1 text-xs hover:bg-gray-50 sm:px-3 sm:py-1.5 sm:text-sm"
             >
               Configurator’a dön
             </Link>
@@ -104,11 +104,11 @@ export default function TopBar() {
               <span className="hidden sm:inline text-xs text-gray-600">
                 {user.email} • {user.role}
               </span>
-              <Link href={dashboardHref} className="rounded-md border px-3 py-1.5 text-sm hover:bg-gray-50">
+              <Link href={dashboardHref} className="rounded-md border px-2 py-1 text-xs hover:bg-gray-50 sm:px-3 sm:py-1.5 sm:text-sm">
                 {user.role === 'investor' ? 'Profil' : 'Dashboard'}
               </Link>
               {user.role === 'investor' && (
-                <Link href="/dashboard/investor/projects" className="rounded-md border px-3 py-1.5 text-sm hover:bg-gray-50">
+                <Link href="/dashboard/investor/projects" className="rounded-md border px-2 py-1 text-xs hover:bg-gray-50 sm:px-3 sm:py-1.5 sm:text-sm">
                   Projelerim
                 </Link>
               )}
@@ -126,7 +126,7 @@ export default function TopBar() {
                     }).catch(() => null);
                     setOfferUnreadCount(0);
                   }}
-                  className={`relative rounded-md border px-3 py-1.5 text-sm hover:bg-gray-50 ${
+                  className={`relative rounded-md border px-2 py-1 text-xs hover:bg-gray-50 sm:px-3 sm:py-1.5 sm:text-sm ${
                     offerUnreadCount > 0 ? 'border-green-600 bg-green-600 text-white hover:bg-green-700' : ''
                   }`}
                 >
@@ -139,25 +139,29 @@ export default function TopBar() {
                 </button>
               )}
               {user.role === 'investor' && (
-                <Link href="/market-suppliers" className="rounded-md border px-3 py-1.5 text-sm hover:bg-gray-50">
-                  Piyasadaki Firmalar / Ekipler
+                <Link href="/market-suppliers" className="rounded-md border px-2 py-1 text-xs hover:bg-gray-50 sm:px-3 sm:py-1.5 sm:text-sm">
+                  <span className="sm:hidden">Firmalar</span>
+                  <span className="hidden sm:inline">Piyasadaki Firmalar / Ekipler</span>
                 </Link>
               )}
               {user.role === 'contractor' && (
-                <Link href="/market-jobs" className="rounded-md border px-3 py-1.5 text-sm hover:bg-gray-50">
-                  Piyasadaki Isler
+                <Link href="/market-jobs" className="rounded-md border px-2 py-1 text-xs hover:bg-gray-50 sm:px-3 sm:py-1.5 sm:text-sm">
+                  <span className="sm:hidden">Isler</span>
+                  <span className="hidden sm:inline">Piyasadaki Isler</span>
                 </Link>
               )}
               <Link
                 href="/messages"
-                className={`rounded-md border px-3 py-1.5 text-sm hover:bg-gray-50 ${
+                className={`rounded-md border px-2 py-1 text-xs hover:bg-gray-50 sm:px-3 sm:py-1.5 sm:text-sm ${
                   unreadCount > 0 ? 'border-green-600 bg-green-600 text-white hover:bg-green-700' : ''
                 }`}
               >
-                Mesajlarim {unreadCount > 0 ? `(${unreadCount} yeni)` : ''}
+                <span className="sm:hidden">Mesaj</span>
+                <span className="hidden sm:inline">Mesajlarim {unreadCount > 0 ? `(${unreadCount} yeni)` : ''}</span>
+                <span className="ml-1 sm:hidden">{unreadCount > 0 ? `(${unreadCount})` : ''}</span>
               </Link>
               {user.role === 'contractor' && (
-                <Link href="/my-offers" className="rounded-md border px-3 py-1.5 text-sm hover:bg-gray-50">
+                <Link href="/my-offers" className="rounded-md border px-2 py-1 text-xs hover:bg-gray-50 sm:px-3 sm:py-1.5 sm:text-sm">
                   Tekliflerim
                 </Link>
               )}
@@ -165,7 +169,7 @@ export default function TopBar() {
                 href="/user-settings"
                 title="Kullanici Islemleri"
                 aria-label="Kullanici Islemleri"
-                className="rounded-md border px-3 py-1.5 text-sm hover:bg-gray-50"
+                className="rounded-md border px-2 py-1 text-xs hover:bg-gray-50 sm:px-3 sm:py-1.5 sm:text-sm"
               >
                 ⚙
               </Link>
@@ -174,7 +178,7 @@ export default function TopBar() {
                   logout();
                   router.push('/');
                 }}
-                className="rounded-md bg-black px-3 py-1.5 text-sm text-white hover:opacity-90"
+                className="rounded-md bg-black px-2 py-1 text-xs text-white hover:opacity-90 sm:px-3 sm:py-1.5 sm:text-sm"
               >
                 Çıkış
               </button>
@@ -185,3 +189,4 @@ export default function TopBar() {
     </div>
   );
 }
+
