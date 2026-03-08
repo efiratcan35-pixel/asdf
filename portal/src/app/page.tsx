@@ -47,6 +47,7 @@ type PublicSupplierPreview = {
   contractorType: 'TAXED' | 'UNTAXED';
   companyName: string;
   ownerName: string;
+  previewImageUrl?: string;
 };
 
 function formatTry(value: number) {
@@ -723,9 +724,16 @@ export default function HomePage() {
                     <Link
                       key={s.userId}
                       href={`/public-suppliers/${s.userId}`}
-                      className="block rounded border bg-white px-2 py-1 hover:bg-gray-50"
+                      className="flex items-center justify-between gap-2 rounded border bg-white px-2 py-1 hover:bg-gray-50"
                     >
-                      {s.companyName || s.ownerName || s.email}
+                      <span className="truncate">{s.companyName || s.ownerName || s.email}</span>
+                      {s.previewImageUrl ? (
+                        <img
+                          src={toApiUrl(s.previewImageUrl)}
+                          alt="Firma"
+                          className="h-7 w-7 shrink-0 rounded border object-cover"
+                        />
+                      ) : null}
                     </Link>
                   ))
                 )}

@@ -343,6 +343,7 @@ export class AuthService {
     const profiles = await this.prisma.contractorProfile.findMany({
       include: {
         user: { select: { id: true, email: true } },
+        media: { orderBy: { createdAt: 'desc' }, take: 1 },
       },
       orderBy: { updatedAt: 'desc' },
       take: Math.max(1, limit),
@@ -356,6 +357,7 @@ export class AuthService {
         contractorType: p.contractorType,
         companyName: p.companyName ?? '',
         ownerName: p.ownerName ?? '',
+        previewImageUrl: p.ownerPhotoUrl || p.media[0]?.url || '',
       }));
   }
 
