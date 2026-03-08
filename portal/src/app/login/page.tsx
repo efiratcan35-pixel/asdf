@@ -64,10 +64,11 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gray-50">
       <TopBar />
-      <div className="w-full max-w-md rounded-xl bg-white shadow p-6">
-        <h1 className="text-2xl font-semibold">Giris Yap</h1>
+      <main className="mx-auto flex min-h-[calc(100vh-64px)] w-full max-w-md items-center justify-center p-4">
+        <div className="w-full rounded-xl bg-white shadow p-6">
+          <h1 className="text-2xl font-semibold">Giris Yap</h1>
 
         <form onSubmit={onSubmit} className="mt-6 space-y-4">
           <div>
@@ -119,13 +120,14 @@ export default function LoginPage() {
           </button>
         </form>
 
-        <div className="mt-4 text-sm text-gray-600">
-          Hesabin yok mu?{' '}
-          <Link href="/register" className="font-semibold text-black underline">
-            Uye ol
-          </Link>
+          <div className="mt-4 text-sm text-gray-600">
+            Hesabin yok mu?{' '}
+            <Link href="/register" className="font-semibold text-black underline">
+              Uye ol
+            </Link>
+          </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 }

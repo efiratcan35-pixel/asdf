@@ -114,11 +114,12 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gray-50">
       <TopBar />
-      <div className="w-full max-w-2xl rounded-xl bg-white shadow p-6">
-        <div className="text-2xl font-semibold">Uye Ol</div>
-        <div className="text-sm text-gray-500 mt-1">{helperText}</div>
+      <main className="mx-auto flex min-h-[calc(100vh-64px)] w-full max-w-2xl items-center justify-center p-4">
+        <div className="w-full rounded-xl bg-white shadow p-6">
+          <div className="text-2xl font-semibold">Uye Ol</div>
+          <div className="text-sm text-gray-500 mt-1">{helperText}</div>
 
         <form onSubmit={onSubmit} className="mt-6 space-y-4">
           <div className="grid grid-cols-1 gap-3">
@@ -303,13 +304,14 @@ export default function RegisterPage() {
           </button>
         </form>
 
-        <div className="mt-4 text-sm text-gray-600">
-          Zaten hesabin var mi?{' '}
-          <Link href="/login" className="font-semibold text-black underline">
-            Giris yap
-          </Link>
+          <div className="mt-4 text-sm text-gray-600">
+            Zaten hesabin var mi?{' '}
+            <Link href="/login" className="font-semibold text-black underline">
+              Giris yap
+            </Link>
+          </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 }
