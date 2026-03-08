@@ -157,8 +157,8 @@ export default function MarketSuppliersPage() {
   return (
     <div className="min-h-screen bg-gray-100">
       <TopBar />
-      <main className="mx-auto max-w-7xl p-6">
-        <section className="rounded-xl border bg-white p-6 shadow-sm">
+      <main className="mx-auto max-w-7xl p-3 sm:p-6">
+        <section className="rounded-xl border bg-white p-4 sm:p-6 shadow-sm overflow-hidden">
           <h1 className="text-2xl font-semibold">Piyasadaki Firmalar</h1>
           <p className="mt-1 text-sm text-gray-600">
             Kayitli vergi levhali ve vergi levhasiz tum tedarikciler.
@@ -172,20 +172,20 @@ export default function MarketSuppliersPage() {
 
           <div className="mt-4 grid gap-3 md:grid-cols-2">
             {suppliers.map((s) => (
-              <article key={s.userId} className="rounded-lg border p-3">
+              <article key={s.userId} className="rounded-lg border p-3 overflow-hidden">
                 <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <Link href={`/market-suppliers/${s.userId}`} className="font-medium underline">
+                  <div className="min-w-0">
+                    <Link href={`/market-suppliers/${s.userId}`} className="font-medium underline break-words">
                       {s.companyName || s.ownerName || s.email}
                     </Link>
-                    <div className="text-xs text-gray-600">{s.email}</div>
+                    <div className="text-xs text-gray-600 break-all">{s.email}</div>
                   </div>
-                  <span className="rounded border px-2 py-0.5 text-xs">
+                  <span className="shrink-0 rounded border px-2 py-0.5 text-xs">
                     {s.contractorType === 'TAXED' ? 'Vergi levhali' : 'Vergi levhasiz'}
                   </span>
                 </div>
                 {s.servicesText && <div className="mt-2 text-sm">Meslek/Is: {s.servicesText}</div>}
-                {s.about && <div className="mt-1 text-sm text-gray-700">{s.about}</div>}
+                {s.about && <div className="mt-1 text-sm text-gray-700 break-words">{s.about}</div>}
                 <div className="mt-2 text-xs text-gray-600">Referans sayisi: {s.referenceCount}</div>
                 {s.ownerPhotoUrl && (
                   <Link href={`/market-suppliers/${s.userId}`}>
@@ -211,7 +211,7 @@ export default function MarketSuppliersPage() {
         </section>
 
         {chatSupplier && (
-          <aside className="fixed right-4 top-24 z-50 w-[360px] rounded-lg border bg-white p-3 shadow-xl">
+          <aside className="fixed right-3 top-20 z-50 w-[calc(100vw-1.5rem)] max-w-[360px] rounded-lg border bg-white p-3 shadow-xl">
             <div className="mb-2 flex items-center justify-between">
               <div>
                 <div className="text-sm font-semibold">Firma ile sohbet</div>
