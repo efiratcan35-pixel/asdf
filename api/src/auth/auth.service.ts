@@ -339,6 +339,26 @@ export class AuthService {
       });
   }
 
+  async listPublicMarketContractorsPreview(limit = 3) {
+    const profiles = await this.prisma.contractorProfile.findMany({
+      include: {
+        user: { select: { id: true, email: true } },
+      },
+      orderBy: { updatedAt: 'desc' },
+      take: Math.max(1, limit),
+    });
+
+    return profiles
+      .filter((p) => !isUserHidden(p.userId))
+      .map((p) => ({
+        userId: p.userId,
+        email: p.user.email,
+        contractorType: p.contractorType,
+        companyName: p.companyName ?? '',
+        ownerName: p.ownerName ?? '',
+      }));
+  }
+
   async getMarketContractorDetail(requesterUserId: number, contractorUserId: number) {
     const requester = await this.prisma.user.findUnique({
       where: { id: requesterUserId },

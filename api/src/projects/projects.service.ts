@@ -275,6 +275,36 @@ export class ProjectsService {
     };
   }
 
+  async findMarketPreview(limit = 3) {
+    const projects = await this.prisma.project.findMany({
+      where: {
+        user: { role: 'investor' },
+      },
+      orderBy: { createdAt: 'desc' },
+      take: Math.max(1, limit),
+      include: {
+        user: {
+          select: { id: true, email: true },
+        },
+      },
+    });
+
+    return projects
+      .filter((p) => !isUserHidden(p.userId))
+      .map((p) => {
+        const enriched = this.enrichProject(p);
+        return {
+          id: enriched.id,
+          name: enriched.name ?? null,
+          buildingType: enriched.buildingType,
+          lengthM: enriched.lengthM,
+          widthM: enriched.widthM,
+          heightM: enriched.heightM,
+          createdAt: enriched.createdAt,
+        };
+      });
+  }
+
   async update(userId: number, projectId: number, body: any) {
     const existing = await this.prisma.project.findFirst({
       where: { id: projectId, userId },

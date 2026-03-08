@@ -39,6 +39,14 @@ type ProjectItem = {
   createdAt: string;
 };
 
+type PublicSupplierPreview = {
+  userId: number;
+  email: string;
+  contractorType: 'TAXED' | 'UNTAXED';
+  companyName: string;
+  ownerName: string;
+};
+
 function formatTry(value: number) {
   return new Intl.NumberFormat('tr-TR', {
     style: 'currency',
@@ -412,6 +420,8 @@ export default function HomePage() {
   const [projectsLoading, setProjectsLoading] = useState(false);
   const [projectsError, setProjectsError] = useState<string | null>(null);
   const [savingProject, setSavingProject] = useState(false);
+  const [marketPreviewProjects, setMarketPreviewProjects] = useState<ProjectItem[]>([]);
+  const [marketPreviewSuppliers, setMarketPreviewSuppliers] = useState<PublicSupplierPreview[]>([]);
 
   const minHallCount = 1;
   const maxHallCount = Math.max(1, Math.floor(lengthM / 10));
@@ -445,6 +455,37 @@ export default function HomePage() {
   }
 
   const isInvestor = user?.role === 'investor';
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const fetchPreview = async () => {
+      try {
+        const [projectsRes, suppliersRes] = await Promise.all([
+          fetch(`${API_BASE}/public/projects/market-preview?limit=3`),
+          fetch(`${API_BASE}/auth/public-market-contractors-preview?limit=3`),
+        ]);
+
+        const projectsData = await projectsRes.json().catch(() => []);
+        const suppliersData = await suppliersRes.json().catch(() => []);
+
+        if (!cancelled) {
+          setMarketPreviewProjects(Array.isArray(projectsData) ? projectsData : []);
+          setMarketPreviewSuppliers(Array.isArray(suppliersData) ? suppliersData : []);
+        }
+      } catch {
+        if (!cancelled) {
+          setMarketPreviewProjects([]);
+          setMarketPreviewSuppliers([]);
+        }
+      }
+    };
+
+    fetchPreview();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     if (!token || !isInvestor) return;
@@ -614,6 +655,56 @@ export default function HomePage() {
             <p className="text-sm text-gray-600">
               Cati makasi, kolonlar, seffaf cati kaplamasi ve opsiyonel kren kirisi ile canli model.
             </p>
+          </div>
+
+          <div className="mb-4 grid gap-3 md:grid-cols-2">
+            <div className="rounded-xl border bg-gray-50 p-3">
+              <div className="flex items-center justify-between gap-2">
+                <h2 className="text-sm font-semibold">Piyasadaki Isler</h2>
+                <button
+                  type="button"
+                  className="rounded border px-2 py-1 text-xs"
+                  onClick={() => setPopupMsg('daha fazla proje görmek için lütfen üye olun')}
+                >
+                  Daha fazla proje
+                </button>
+              </div>
+              <div className="mt-2 space-y-1 text-xs text-gray-700">
+                {marketPreviewProjects.length === 0 ? (
+                  <div>Henuz proje yok.</div>
+                ) : (
+                  marketPreviewProjects.map((p) => (
+                    <div key={p.id} className="rounded border bg-white px-2 py-1">
+                      {p.name ?? `Proje ${p.id}`}
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+
+            <div className="rounded-xl border bg-gray-50 p-3">
+              <div className="flex items-center justify-between gap-2">
+                <h2 className="text-sm font-semibold">Firmalar</h2>
+                <button
+                  type="button"
+                  className="rounded border px-2 py-1 text-xs"
+                  onClick={() => setPopupMsg('daha fazla firma görmek için lütfen üye olun')}
+                >
+                  Daha fazla firma
+                </button>
+              </div>
+              <div className="mt-2 space-y-1 text-xs text-gray-700">
+                {marketPreviewSuppliers.length === 0 ? (
+                  <div>Henuz firma yok.</div>
+                ) : (
+                  marketPreviewSuppliers.map((s) => (
+                    <div key={s.userId} className="rounded border bg-white px-2 py-1">
+                      {s.companyName || s.ownerName || s.email}
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
           </div>
 
           <div className="grid gap-4 lg:grid-cols-12">

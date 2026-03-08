@@ -6,6 +6,7 @@ import {
   Get,
   Param,
   Post,
+  Query,
   Put,
   Req,
   UploadedFile,
@@ -103,6 +104,11 @@ export class AuthController {
   @Get('market-contractors')
   marketContractors(@Req() req: any) {
     return this.authService.listMarketContractors(req.user.sub);
+  }
+
+  @Get('public-market-contractors-preview')
+  marketContractorsPreview(@Query('limit') limit?: string) {
+    return this.authService.listPublicMarketContractorsPreview(Number(limit ?? 3));
   }
 
   @UseGuards(JwtAuthGuard)
