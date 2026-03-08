@@ -417,6 +417,56 @@ export class AuthService {
     };
   }
 
+  async getPublicMarketContractorDetail(contractorUserId: number) {
+    const profile = await this.prisma.contractorProfile.findUnique({
+      where: { userId: contractorUserId },
+      include: {
+        user: { select: { id: true, email: true } },
+        references: { orderBy: { createdAt: 'desc' } },
+        media: { orderBy: { createdAt: 'desc' } },
+      },
+    });
+    if (!profile) throw new BadRequestException('Firma bulunamadi');
+    if (isUserHidden(profile.userId)) throw new BadRequestException('Firma bulunamadi');
+
+    const galleryMedia = profile.media.filter((m) => (m.caption ?? '') !== 'Profil fotografi');
+    const seenUrls = new Set<string>();
+    const dedupedGallery = galleryMedia.filter((m) => {
+      if (seenUrls.has(m.url)) return false;
+      seenUrls.add(m.url);
+      return true;
+    });
+
+    return {
+      userId: profile.userId,
+      email: profile.user.email,
+      contractorType: profile.contractorType,
+      companyName: profile.companyName ?? '',
+      ownerName: profile.ownerName ?? '',
+      ownerPhotoUrl: profile.ownerPhotoUrl ?? '',
+      about: profile.about ?? '',
+      servicesText: profile.servicesText ?? '',
+      references: profile.references.map((r) => {
+        const [companyName, title] = (r.companyName ?? '').split('|||');
+        return {
+          id: r.id,
+          personName: r.personName,
+          companyName: companyName || '',
+          title: title || '',
+          phone: r.phone ?? '',
+          email: r.email ?? '',
+        };
+      }),
+      media: dedupedGallery.map((m) => ({
+        id: m.id,
+        type: m.type,
+        url: m.url,
+        caption: m.caption ?? '',
+        createdAt: m.createdAt,
+      })),
+    };
+  }
+
   async updatePassword(
     userId: number,
     body: { currentPassword?: string; newPassword?: string },

@@ -720,9 +720,13 @@ export default function HomePage() {
                   <div>Henuz firma yok.</div>
                 ) : (
                   marketPreviewSuppliers.map((s) => (
-                    <div key={s.userId} className="rounded border bg-white px-2 py-1">
+                    <Link
+                      key={s.userId}
+                      href={`/public-suppliers/${s.userId}`}
+                      className="block rounded border bg-white px-2 py-1 hover:bg-gray-50"
+                    >
                       {s.companyName || s.ownerName || s.email}
-                    </div>
+                    </Link>
                   ))
                 )}
               </div>

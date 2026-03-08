@@ -111,6 +111,11 @@ export class AuthController {
     return this.authService.listPublicMarketContractorsPreview(Number(limit ?? 3));
   }
 
+  @Get('public-market-contractors/:userId')
+  publicMarketContractorDetail(@Param('userId') userId: string) {
+    return this.authService.getPublicMarketContractorDetail(Number(userId));
+  }
+
   @UseGuards(JwtAuthGuard)
   @Get('market-contractors/:userId')
   marketContractorDetail(@Req() req: any, @Param('userId') userId: string) {
