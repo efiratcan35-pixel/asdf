@@ -657,13 +657,6 @@ export default function HomePage() {
       <TopBar />
       <main className="mx-auto max-w-7xl p-4 md:p-6">
         <section className="rounded-2xl border bg-white p-4 shadow-sm md:p-6">
-          <div className="mb-4">
-            <h1 className="text-xl font-semibold md:text-2xl">3D Configurator</h1>
-            <p className="text-sm text-gray-600">
-              Cati makasi, kolonlar, seffaf cati kaplamasi ve opsiyonel kren kirisi ile canli model.
-            </p>
-          </div>
-
           <div className="mb-4 grid gap-3 md:grid-cols-2">
             <div className="rounded-xl border bg-gray-50 p-3">
               <div className="flex items-center justify-between gap-2">
@@ -739,6 +732,13 @@ export default function HomePage() {
                 )}
               </div>
             </div>
+          </div>
+
+          <div className="mb-4">
+            <h1 className="text-xl font-semibold md:text-2xl">3D Configurator</h1>
+            <p className="text-sm text-gray-600">
+              Cati makasi, kolonlar, seffaf cati kaplamasi ve opsiyonel kren kirisi ile canli model.
+            </p>
           </div>
 
           <div className="grid gap-4 lg:grid-cols-12">
