@@ -5,7 +5,6 @@ import TopBar from '@/components/TopBar';
 import { useAuth } from '@/lib/auth';
 import ConfiguratorCanvas, { type BuildingType } from '@/components/ConfiguratorCanvas';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? 'http://localhost:3002';
 
@@ -102,7 +101,6 @@ function formatDateTime(v: string) {
 }
 
 export default function InvestorDashboardPage() {
-  const searchParams = useSearchParams();
   const { token, user } = useAuth();
 
   const [projects, setProjects] = useState<ProjectItem[]>([]);
@@ -141,9 +139,15 @@ export default function InvestorDashboardPage() {
   const [budgetTry, setBudgetTry] = useState('');
   const [newPhotos, setNewPhotos] = useState<File[]>([]);
   const [createConstraintMsg, setCreateConstraintMsg] = useState<string | null>(null);
+  const [showCreateForm, setShowCreateForm] = useState(false);
 
   const canUsePanel = useMemo(() => user?.role === 'investor', [user?.role]);
-  const showCreateForm = searchParams.get('new') === '1';
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const params = new URLSearchParams(window.location.search);
+    setShowCreateForm(params.get('new') === '1');
+  }, []);
 
   function resetForm() {
     setName('');
