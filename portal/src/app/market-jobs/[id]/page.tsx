@@ -85,6 +85,7 @@ export default function MarketJobDetailPage() {
   const [chatLoading, setChatLoading] = useState(false);
   const [chatError, setChatError] = useState<string | null>(null);
   const [chatLastLoginAt, setChatLastLoginAt] = useState<string | null>(null);
+  const [previewPhoto, setPreviewPhoto] = useState<{ url: string; caption?: string | null } | null>(null);
 
   const canSee = useMemo(() => user?.role === 'contractor', [user?.role]);
 
@@ -227,12 +228,18 @@ export default function MarketJobDetailPage() {
                   <div className="mb-2 text-sm font-medium">Yer fotograflari</div>
                   <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
                     {(project.photos ?? []).map((ph) => (
-                      <img
+                      <button
                         key={ph.id}
-                        src={photoSrc(ph.url)}
-                        alt={ph.caption ?? 'Proje fotografi'}
-                        className="h-32 w-full rounded border object-cover"
-                      />
+                        type="button"
+                        className="overflow-hidden rounded border bg-gray-100"
+                        onClick={() => setPreviewPhoto({ url: photoSrc(ph.url), caption: ph.caption })}
+                      >
+                        <img
+                          src={photoSrc(ph.url)}
+                          alt={ph.caption ?? 'Proje fotografi'}
+                          className="h-32 w-full object-contain"
+                        />
+                      </button>
                     ))}
                   </div>
                 </div>
@@ -316,6 +323,20 @@ export default function MarketJobDetailPage() {
               </button>
             </div>
           </aside>
+        )}
+        {previewPhoto && (
+          <div
+            className="fixed inset-0 z-[60] flex items-center justify-center bg-black/70 p-4"
+            onClick={() => setPreviewPhoto(null)}
+          >
+            <div className="max-h-[90vh] max-w-[90vw]">
+              <img
+                src={previewPhoto.url}
+                alt={previewPhoto.caption ?? 'Proje fotografi'}
+                className="max-h-[85vh] max-w-[90vw] rounded border border-white bg-white object-contain"
+              />
+            </div>
+          </div>
         )}
       </main>
     </div>

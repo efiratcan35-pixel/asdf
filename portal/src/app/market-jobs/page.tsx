@@ -90,6 +90,7 @@ export default function MarketJobsPage() {
   const [offerPriceTry, setOfferPriceTry] = useState('');
   const [offerSaving, setOfferSaving] = useState(false);
   const [offerError, setOfferError] = useState<string | null>(null);
+  const [previewPhoto, setPreviewPhoto] = useState<{ url: string; caption?: string | null } | null>(null);
 
   const canSee = useMemo(() => user?.role === 'contractor', [user?.role]);
 
@@ -266,12 +267,18 @@ export default function MarketJobsPage() {
                 {(p.photos ?? []).length > 0 && (
                   <div className="mt-3 grid grid-cols-2 gap-2">
                     {(p.photos ?? []).slice(0, 4).map((ph) => (
-                      <img
+                      <button
                         key={ph.id}
-                        src={photoSrc(ph.url)}
-                        alt={ph.caption ?? 'Proje fotografi'}
-                        className="h-24 w-full rounded border object-cover"
-                      />
+                        type="button"
+                        className="overflow-hidden rounded border bg-gray-100"
+                        onClick={() => setPreviewPhoto({ url: photoSrc(ph.url), caption: ph.caption })}
+                      >
+                        <img
+                          src={photoSrc(ph.url)}
+                          alt={ph.caption ?? 'Proje fotografi'}
+                          className="h-24 w-full object-contain"
+                        />
+                      </button>
                     ))}
                   </div>
                 )}
@@ -433,6 +440,20 @@ export default function MarketJobsPage() {
               </button>
             </div>
           </aside>
+        )}
+        {previewPhoto && (
+          <div
+            className="fixed inset-0 z-[60] flex items-center justify-center bg-black/70 p-4"
+            onClick={() => setPreviewPhoto(null)}
+          >
+            <div className="max-h-[90vh] max-w-[90vw]">
+              <img
+                src={previewPhoto.url}
+                alt={previewPhoto.caption ?? 'Proje fotografi'}
+                className="max-h-[85vh] max-w-[90vw] rounded border border-white bg-white object-contain"
+              />
+            </div>
+          </div>
         )}
       </main>
     </div>
