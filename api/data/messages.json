@@ -1,0 +1,145 @@
+[
+  {
+    "id": 1772881761672,
+    "projectId": 5,
+    "fromUserId": 1,
+    "toUserId": 2,
+    "text": "selam naber",
+    "createdAt": "2026-03-07T11:09:20.940Z",
+    "readBy": [
+      1,
+      2
+    ]
+  },
+  {
+    "id": 1772881803481,
+    "projectId": 5,
+    "fromUserId": 2,
+    "toUserId": 1,
+    "text": "iyi canım senden naber",
+    "createdAt": "2026-03-07T11:10:02.994Z",
+    "readBy": [
+      2,
+      1
+    ]
+  },
+  {
+    "id": 1772958675476,
+    "projectId": 5,
+    "fromUserId": 3,
+    "toUserId": 2,
+    "text": "hello boyzz..",
+    "createdAt": "2026-03-08T08:31:14.501Z",
+    "readBy": [
+      3,
+      2
+    ]
+  },
+  {
+    "id": 1772959715009,
+    "projectId": 5,
+    "fromUserId": 2,
+    "toUserId": 3,
+    "text": "hello naber",
+    "createdAt": "2026-03-08T08:48:34.666Z",
+    "readBy": [
+      2,
+      3
+    ]
+  },
+  {
+    "id": 1772962138232,
+    "projectId": 7,
+    "fromUserId": 6,
+    "toUserId": 5,
+    "text": "naber yavru",
+    "createdAt": "2026-03-08T09:28:57.510Z",
+    "readBy": [
+      6,
+      5
+    ]
+  },
+  {
+    "id": 1772962248084,
+    "projectId": 7,
+    "fromUserId": 1,
+    "toUserId": 6,
+    "text": "slm naber",
+    "createdAt": "2026-03-08T09:30:47.129Z",
+    "readBy": [
+      1,
+      6
+    ]
+  },
+  {
+    "id": 1772962253943,
+    "projectId": 6,
+    "fromUserId": 1,
+    "toUserId": 6,
+    "text": "aaaoooo",
+    "createdAt": "2026-03-08T09:30:53.182Z",
+    "readBy": [
+      1,
+      6
+    ]
+  },
+  {
+    "id": 1772962361536,
+    "projectId": null,
+    "fromUserId": 6,
+    "toUserId": 5,
+    "text": "slm naber 5",
+    "createdAt": "2026-03-08T09:32:41.350Z",
+    "readBy": [
+      6,
+      5
+    ]
+  },
+  {
+    "id": 1772962568251,
+    "projectId": null,
+    "fromUserId": 6,
+    "toUserId": 4,
+    "text": "hello dostum",
+    "createdAt": "2026-03-08T09:36:07.348Z",
+    "readBy": [
+      6,
+      4
+    ]
+  },
+  {
+    "id": 1772962682179,
+    "projectId": 5,
+    "fromUserId": 2,
+    "toUserId": 3,
+    "text": "nabıon panpa",
+    "createdAt": "2026-03-08T09:38:01.181Z",
+    "readBy": [
+      2,
+      3
+    ]
+  },
+  {
+    "id": 1772963440220,
+    "projectId": 5,
+    "fromUserId": 2,
+    "toUserId": 1,
+    "text": "iyilik güzellik sen nassın",
+    "createdAt": "2026-03-08T09:50:39.497Z",
+    "readBy": [
+      2,
+      1
+    ]
+  },
+  {
+    "id": 1772966061696,
+    "projectId": 9,
+    "fromUserId": 4,
+    "toUserId": 9,
+    "text": "slm naber",
+    "createdAt": "2026-03-08T10:34:20.831Z",
+    "readBy": [
+      4
+    ]
+  }
+]

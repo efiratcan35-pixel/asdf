@@ -1,0 +1,72 @@
+{
+  "2": {
+    "photos": [
+      {
+        "id": 1772798673883,
+        "url": "/uploads/projects/1772798672997-675991889.png",
+        "createdAt": "2026-03-06T12:04:33.005Z"
+      },
+      {
+        "id": 1772798668777,
+        "url": "/uploads/projects/1772798668084-980967313.png",
+        "createdAt": "2026-03-06T12:04:28.095Z"
+      }
+    ],
+    "investorNote": null,
+    "locationText": null,
+    "budgetTry": 25000000
+  },
+  "3": {
+    "photos": [
+      {
+        "id": 1772796802957,
+        "url": "/uploads/projects/1772796802678-467446454.png",
+        "createdAt": "2026-03-06T11:33:22.684Z"
+      }
+    ],
+    "investorNote": null,
+    "locationText": null,
+    "budgetTry": null
+  },
+  "5": {
+    "photos": [],
+    "investorNote": null,
+    "locationText": null,
+    "budgetTry": null
+  },
+  "6": {
+    "photos": [
+      {
+        "id": 1772961209053,
+        "url": "/uploads/projects/1772961208328-253945630.png",
+        "createdAt": "2026-03-08T09:13:28.336Z"
+      },
+      {
+        "id": 1772961206511,
+        "url": "/uploads/projects/1772961205502-893912721.png",
+        "createdAt": "2026-03-08T09:13:25.520Z"
+      }
+    ],
+    "investorNote": null,
+    "locationText": null,
+    "budgetTry": null
+  },
+  "7": {
+    "photos": [],
+    "investorNote": null,
+    "locationText": null,
+    "budgetTry": null
+  },
+  "8": {
+    "photos": [],
+    "investorNote": null,
+    "locationText": null,
+    "budgetTry": null
+  },
+  "9": {
+    "photos": [],
+    "investorNote": "hızlı bi iş istiyorum, panel, çelik teklifleri bekliyorum.m",
+    "locationText": "antalya",
+    "budgetTry": 25
+  }
+}

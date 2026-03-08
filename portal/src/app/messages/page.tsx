@@ -1,0 +1,284 @@
+'use client';
+
+import { FormEvent, useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
+import TopBar from '@/components/TopBar';
+import { useAuth } from '@/lib/auth';
+
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? 'http://localhost:3002';
+
+type ConversationItem = {
+  projectId: number | null;
+  otherUserId: number;
+  otherUser: { id: number; email: string; role: string } | null;
+  otherUserLastLoginAt?: string | null;
+  project: { id: number; name: string | null } | null;
+  lastMessage: string;
+  lastMessageAt: string;
+  unreadCount: number;
+};
+
+type ChatMessage = {
+  id: number;
+  projectId: number | null;
+  fromUserId: number;
+  toUserId: number;
+  text: string;
+  createdAt: string;
+  readBy?: number[];
+};
+
+function formatDateTime(v: string) {
+  const d = new Date(v);
+  return d.toLocaleString('tr-TR', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+}
+
+export default function MessagesPage() {
+  const searchParams = useSearchParams();
+  const { token, user } = useAuth();
+  const [items, setItems] = useState<ConversationItem[]>([]);
+  const [selected, setSelected] = useState<ConversationItem | null>(null);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [text, setText] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [chatLoading, setChatLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const canUse = useMemo(() => Boolean(user), [user]);
+  const desiredProjectId = Number(searchParams.get('projectId') ?? '');
+  const desiredOtherUserId = Number(searchParams.get('otherUserId') ?? '');
+
+  async function loadConversations() {
+    if (!token) return;
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch(`${API_BASE}/messages/mine`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json().catch(() => ([]));
+      if (!res.ok) throw new Error(data?.message ?? 'Mesajlar getirilemedi');
+      const list = Array.isArray(data) ? (data as ConversationItem[]) : [];
+      setItems(list);
+      if (Number.isInteger(desiredProjectId) && Number.isInteger(desiredOtherUserId)) {
+        const matched = list.find(
+          (it) => it.projectId === desiredProjectId && it.otherUserId === desiredOtherUserId,
+        );
+        if (matched) {
+          setSelected(matched);
+        } else {
+          setSelected({
+            projectId: desiredProjectId,
+            otherUserId: desiredOtherUserId,
+            otherUser: null,
+            otherUserLastLoginAt: null,
+            project: { id: desiredProjectId, name: null },
+            lastMessage: '',
+            lastMessageAt: new Date().toISOString(),
+            unreadCount: 0,
+          });
+        }
+      } else if (!selected && list.length > 0) {
+        setSelected(list[0]);
+      }
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : 'Mesajlar getirilemedi');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function loadChat(item: ConversationItem) {
+    if (!token) return;
+    setChatLoading(true);
+    setError(null);
+    try {
+      const res = await fetch(
+        `${API_BASE}/messages/project/${item.projectId}/user/${item.otherUserId}`,
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+      const data = await res.json().catch(() => ([]));
+      if (!res.ok) throw new Error(data?.message ?? 'Sohbet getirilemedi');
+      setMessages(Array.isArray(data) ? (data as ChatMessage[]) : []);
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : 'Sohbet getirilemedi');
+    } finally {
+      setChatLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    if (!token || !canUse) return;
+    loadConversations();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token, canUse, desiredProjectId, desiredOtherUserId]);
+
+  useEffect(() => {
+    if (!selected) {
+      setMessages([]);
+      return;
+    }
+    const run = async () => {
+      await loadChat(selected);
+      if (!token) return;
+      await fetch(`${API_BASE}/messages/mark-read-conversation`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          projectId: selected.projectId,
+          otherUserId: selected.otherUserId,
+        }),
+      }).catch(() => null);
+      await loadConversations();
+    };
+    run();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selected?.projectId, selected?.otherUserId, token]);
+
+  async function onSend(e: FormEvent) {
+    e.preventDefault();
+    if (!token || !selected || !text.trim()) return;
+    try {
+      const res = await fetch(`${API_BASE}/messages`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          projectId: selected.projectId,
+          toUserId: selected.otherUserId,
+          text: text.trim(),
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data?.message ?? 'Mesaj gonderilemedi');
+      setText('');
+      await loadChat(selected);
+      await loadConversations();
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : 'Mesaj gonderilemedi');
+    }
+  }
+
+  if (!canUse) {
+    return (
+      <div className="min-h-screen bg-gray-100">
+        <TopBar />
+        <main className="mx-auto max-w-6xl p-6">
+          <div className="rounded-xl border bg-white p-6 text-sm text-gray-700">
+            Mesajlarim sayfasi icin giris yapmaniz gerekir.
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-100">
+      <TopBar />
+      <main className="mx-auto max-w-7xl p-6">
+        <div className="grid gap-4 lg:grid-cols-[320px,1fr]">
+          <section className="rounded-xl border bg-white p-4">
+            <h1 className="text-lg font-semibold">Mesajlarim</h1>
+            {loading && <div className="mt-2 text-sm text-gray-500">Yukleniyor...</div>}
+            <div className="mt-3 space-y-2">
+              {items.map((it) => (
+                <button
+                  key={`${it.projectId}-${it.otherUserId}`}
+                  type="button"
+                  onClick={() => setSelected(it)}
+                  className={`w-full rounded border p-2 text-left text-sm ${
+                    selected?.projectId === it.projectId && selected?.otherUserId === it.otherUserId
+                      ? 'border-black'
+                      : it.unreadCount > 0
+                        ? 'border-green-300 bg-green-50'
+                        : ''
+                  }`}
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="font-medium">{it.project?.name ?? 'Genel Sohbet'}</div>
+                    {it.unreadCount > 0 && (
+                      <span className="rounded bg-green-600 px-1.5 py-0.5 text-[11px] text-white">
+                        ({it.unreadCount})
+                      </span>
+                    )}
+                  </div>
+                  <div className="text-xs text-gray-600">{it.otherUser?.email ?? '-'}</div>
+                  <div className="mt-1 line-clamp-1 text-xs text-gray-500">{it.lastMessage}</div>
+                  <div className="mt-1 text-[11px] text-gray-500">{formatDateTime(it.lastMessageAt)}</div>
+                </button>
+              ))}
+            </div>
+          </section>
+
+          <section className="rounded-xl border bg-white p-4">
+            {error && <div className="mb-3 rounded border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</div>}
+            {!selected ? (
+              <div className="text-sm text-gray-600">Soldan bir konusma secin.</div>
+            ) : (
+              <>
+                <div className="border-b pb-2">
+                  <div className="font-medium">{selected.project?.name ?? 'Genel Sohbet'}</div>
+                  <div className="text-xs text-gray-600">{selected.otherUser?.email ?? '-'}</div>
+                  <div className="text-[11px] text-gray-500">
+                    Son giris: {selected.otherUserLastLoginAt ? formatDateTime(selected.otherUserLastLoginAt) : '-'}
+                  </div>
+                </div>
+                <div className="mt-3 h-[420px] overflow-y-auto rounded border p-3">
+                  {chatLoading ? (
+                    <div className="text-sm text-gray-500">Mesajlar yukleniyor...</div>
+                  ) : (
+                    <div className="space-y-2">
+                      {messages.map((m) => {
+                        const mine = m.fromUserId === user?.sub;
+                        const isReadByOther = Boolean(
+                          mine && selected && (m.readBy ?? []).includes(selected.otherUserId),
+                        );
+                        return (
+                          <div key={m.id} className={`flex ${mine ? 'justify-end' : 'justify-start'}`}>
+                            <div className={`max-w-[80%] rounded px-3 py-2 text-sm ${mine ? 'bg-black text-white' : 'bg-gray-100'}`}>
+                              <div>{m.text}</div>
+                              <div className={`mt-1 flex items-center justify-end gap-1 text-[10px] ${mine ? 'text-gray-200' : 'text-gray-500'}`}>
+                                <span>{formatDateTime(m.createdAt)}</span>
+                                {mine && (
+                                  <span className={isReadByOther ? 'text-sky-400' : 'text-gray-300'}>
+                                    {isReadByOther ? '✓✓' : '✓'}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+                <form onSubmit={onSend} className="mt-3 flex gap-2">
+                  <input
+                    className="flex-1 rounded border px-3 py-2 text-sm"
+                    placeholder="Mesaj yazin..."
+                    value={text}
+                    onChange={(e) => setText(e.target.value)}
+                  />
+                  <button type="submit" className="rounded bg-black px-4 py-2 text-sm text-white">
+                    Gonder
+                  </button>
+                </form>
+              </>
+            )}
+          </section>
+        </div>
+      </main>
+    </div>
+  );
+}

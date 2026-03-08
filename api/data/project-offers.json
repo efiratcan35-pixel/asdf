@@ -1,0 +1,24 @@
+{
+  "7": [
+    {
+      "id": 1772965470601,
+      "projectId": 7,
+      "contractorUserId": 8,
+      "contractorEmail": "efiratcan35@gmail.com",
+      "workItem": "çatı paneli montajı işçilik",
+      "priceText": "158",
+      "createdAt": "2026-03-08T10:24:29.701Z"
+    }
+  ],
+  "9": [
+    {
+      "id": 1772965976708,
+      "projectId": 9,
+      "contractorUserId": 4,
+      "contractorEmail": "a@b.com",
+      "workItem": "çatı paneli",
+      "priceText": "158 ₺ / m² işçilik",
+      "createdAt": "2026-03-08T10:32:56.486Z"
+    }
+  ]
+}
