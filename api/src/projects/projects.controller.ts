@@ -99,6 +99,16 @@ export class ProjectsController {
     return this.projectsService.listMyOffers(req.user.sub);
   }
 
+  @Get('offers/notifications/summary')
+  offerNotificationSummary(@Req() req: any) {
+    return this.projectsService.getOfferNotificationSummary(req.user.sub);
+  }
+
+  @Post('offers/notifications/mark-read')
+  markOfferNotificationsRead(@Req() req: any) {
+    return this.projectsService.markOfferNotificationsRead(req.user.sub);
+  }
+
   @Get(':id/offers')
   offersForProject(@Req() req: any, @Param('id') id: string) {
     return this.projectsService.listOffersForProject(req.user.sub, Number(id));

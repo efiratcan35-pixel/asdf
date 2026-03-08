@@ -12,6 +12,7 @@ export default function TopBar() {
   const router = useRouter();
   const { token, user, logout } = useAuth();
   const [unreadCount, setUnreadCount] = useState(0);
+  const [offerUnreadCount, setOfferUnreadCount] = useState(0);
 
   const isAuthPage = pathname === '/login' || pathname === '/register';
   const dashboardHref =
@@ -31,12 +32,26 @@ export default function TopBar() {
     let cancelled = false;
     const fetchUnread = async () => {
       try {
-        const res = await fetch(`${API_BASE}/messages/unread-count`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        const data = await res.json().catch(() => ({}));
-        if (!res.ok) return;
-        if (!cancelled) setUnreadCount(Number(data?.unreadCount ?? 0));
+        const [msgRes, offerRes] = await Promise.all([
+          fetch(`${API_BASE}/messages/unread-count`, {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+          user?.role === 'investor'
+            ? fetch(`${API_BASE}/projects/offers/notifications/summary`, {
+                headers: { Authorization: `Bearer ${token}` },
+              })
+            : Promise.resolve(null as Response | null),
+        ]);
+
+        const msgData = await msgRes.json().catch(() => ({}));
+        if (msgRes.ok && !cancelled) setUnreadCount(Number(msgData?.unreadCount ?? 0));
+
+        if (offerRes) {
+          const offerData = await offerRes.json().catch(() => ({}));
+          if (offerRes.ok && !cancelled) setOfferUnreadCount(Number(offerData?.unreadCount ?? 0));
+        } else if (!cancelled) {
+          setOfferUnreadCount(0);
+        }
       } catch {
         // ignore polling errors
       }
@@ -96,6 +111,32 @@ export default function TopBar() {
                 <Link href="/dashboard/investor/projects" className="rounded-md border px-3 py-1.5 text-sm hover:bg-gray-50">
                   Projelerim
                 </Link>
+              )}
+              {user.role === 'investor' && (
+                <button
+                  type="button"
+                  title="Teklif bildirimleri"
+                  aria-label="Teklif bildirimleri"
+                  onClick={async () => {
+                    router.push('/dashboard/investor/projects');
+                    if (!token) return;
+                    await fetch(`${API_BASE}/projects/offers/notifications/mark-read`, {
+                      method: 'POST',
+                      headers: { Authorization: `Bearer ${token}` },
+                    }).catch(() => null);
+                    setOfferUnreadCount(0);
+                  }}
+                  className={`relative rounded-md border px-3 py-1.5 text-sm hover:bg-gray-50 ${
+                    offerUnreadCount > 0 ? 'border-green-600 bg-green-600 text-white hover:bg-green-700' : ''
+                  }`}
+                >
+                  Bildirimler
+                  {offerUnreadCount > 0 && (
+                    <span className="absolute -right-2 -top-2 rounded-full bg-white px-1.5 py-0.5 text-[10px] font-semibold text-green-700">
+                      {offerUnreadCount}
+                    </span>
+                  )}
+                </button>
               )}
               {user.role === 'investor' && (
                 <Link href="/market-suppliers" className="rounded-md border px-3 py-1.5 text-sm hover:bg-gray-50">

@@ -35,11 +35,13 @@ type MetaStore = Record<string, ProjectMeta>;
 const dataDir = join(process.cwd(), 'data');
 const metaFile = join(dataDir, 'project-meta.json');
 const offersFile = join(dataDir, 'project-offers.json');
+const offerSeenFile = join(dataDir, 'offer-notification-seen.json');
 
 function ensureMetaFile() {
   if (!existsSync(dataDir)) mkdirSync(dataDir, { recursive: true });
   if (!existsSync(metaFile)) writeFileSync(metaFile, '{}', 'utf-8');
   if (!existsSync(offersFile)) writeFileSync(offersFile, '{}', 'utf-8');
+  if (!existsSync(offerSeenFile)) writeFileSync(offerSeenFile, '{}', 'utf-8');
 }
 
 function readMetaStore(): MetaStore {
@@ -84,6 +86,20 @@ function readOfferStore(): Record<string, ProjectOffer[]> {
 function writeOfferStore(store: Record<string, ProjectOffer[]>) {
   ensureMetaFile();
   writeFileSync(offersFile, JSON.stringify(store, null, 2), 'utf-8');
+}
+
+function readOfferSeenStore(): Record<string, string> {
+  ensureMetaFile();
+  try {
+    return JSON.parse(readFileSync(offerSeenFile, 'utf-8')) as Record<string, string>;
+  } catch {
+    return {};
+  }
+}
+
+function writeOfferSeenStore(store: Record<string, string>) {
+  ensureMetaFile();
+  writeFileSync(offerSeenFile, JSON.stringify(store, null, 2), 'utf-8');
 }
 
 @Injectable()
@@ -510,6 +526,48 @@ export class ProjectsService {
       projectName: projectById[o.projectId]?.name ?? null,
       investorId: projectById[o.projectId]?.userId ?? null,
     }));
+  }
+
+  async getOfferNotificationSummary(userId: number) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true, role: true },
+    });
+    if (!user || user.role !== 'investor') {
+      return { unreadCount: 0 };
+    }
+
+    const projects = await this.prisma.project.findMany({
+      where: { userId },
+      select: { id: true },
+    });
+    const myProjectIds = new Set(projects.map((p) => p.id));
+    if (myProjectIds.size === 0) return { unreadCount: 0 };
+
+    const seenStore = readOfferSeenStore();
+    const lastSeenAt = seenStore[String(userId)] ? new Date(seenStore[String(userId)]) : null;
+
+    const allOffers = Object.values(readOfferStore()).flat();
+    const unreadCount = allOffers.filter((offer) => {
+      if (!myProjectIds.has(offer.projectId)) return false;
+      if (!lastSeenAt) return true;
+      return new Date(offer.createdAt).getTime() > lastSeenAt.getTime();
+    }).length;
+
+    return { unreadCount };
+  }
+
+  async markOfferNotificationsRead(userId: number) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true, role: true },
+    });
+    if (!user || user.role !== 'investor') return { ok: true };
+
+    const store = readOfferSeenStore();
+    store[String(userId)] = new Date().toISOString();
+    writeOfferSeenStore(store);
+    return { ok: true };
   }
 
   async generateModel(userId: number, projectId: number) {
