@@ -29,6 +29,7 @@ type MarketProject = {
     email: string;
   };
   createdAt: string;
+  photos?: { id: number; url: string; caption?: string | null }[];
 };
 
 type ChatMessage = {
@@ -63,6 +64,10 @@ function formatDateTime(v: string) {
     hour: '2-digit',
     minute: '2-digit',
   });
+}
+
+function photoSrc(url: string) {
+  return url.startsWith('http://') || url.startsWith('https://') ? url : `${API_BASE}${url}`;
 }
 
 export default function MarketJobDetailPage() {
@@ -214,6 +219,22 @@ export default function MarketJobDetailPage() {
               {project.investorNote && (
                 <div className="mt-3 rounded border bg-gray-50 p-3 text-sm">
                   <span className="font-medium">Yatirimci Notu:</span> {project.investorNote}
+                </div>
+              )}
+
+              {(project.photos ?? []).length > 0 && (
+                <div className="mt-3">
+                  <div className="mb-2 text-sm font-medium">Yer fotograflari</div>
+                  <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                    {(project.photos ?? []).map((ph) => (
+                      <img
+                        key={ph.id}
+                        src={photoSrc(ph.url)}
+                        alt={ph.caption ?? 'Proje fotografi'}
+                        className="h-32 w-full rounded border object-cover"
+                      />
+                    ))}
+                  </div>
                 </div>
               )}
 

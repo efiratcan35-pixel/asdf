@@ -30,6 +30,7 @@ type MarketProject = {
   };
   createdAt: string;
   offerCount?: number;
+  photos?: { id: number; url: string; caption?: string | null }[];
 };
 
 type ChatMessage = {
@@ -64,6 +65,10 @@ function formatDateTime(v: string) {
     hour: '2-digit',
     minute: '2-digit',
   });
+}
+
+function photoSrc(url: string) {
+  return url.startsWith('http://') || url.startsWith('https://') ? url : `${API_BASE}${url}`;
 }
 
 export default function MarketJobsPage() {
@@ -257,6 +262,19 @@ export default function MarketJobsPage() {
                   {formatNum(p.lengthM)} x {formatNum(p.widthM)} x {formatNum(p.heightM)} m • {p.buildingType}
                 </div>
                 <div className="mt-1 text-xs text-gray-500">Bu projeye gelen teklif sayisi: {p.offerCount ?? 0}</div>
+
+                {(p.photos ?? []).length > 0 && (
+                  <div className="mt-3 grid grid-cols-2 gap-2">
+                    {(p.photos ?? []).slice(0, 4).map((ph) => (
+                      <img
+                        key={ph.id}
+                        src={photoSrc(ph.url)}
+                        alt={ph.caption ?? 'Proje fotografi'}
+                        className="h-24 w-full rounded border object-cover"
+                      />
+                    ))}
+                  </div>
+                )}
 
                 <div className="mt-3 flex flex-wrap gap-2">
                   <button type="button" className="rounded border px-3 py-1 text-xs" onClick={() => toggle3D(p.id)}>
