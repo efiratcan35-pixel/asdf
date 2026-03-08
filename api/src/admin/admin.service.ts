@@ -1,6 +1,5 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { UserStatus } from '@prisma/client';
 
 @Injectable()
 export class AdminService {
@@ -30,7 +29,7 @@ export class AdminService {
 
     return this.prisma.user.update({
       where: { id: userId },
-      data: { status: UserStatus.APPROVED },
+      data: { status: 'APPROVED' },
       select: { id: true, email: true, role: true, status: true },
     });
   }
@@ -43,7 +42,7 @@ export class AdminService {
 
     return this.prisma.user.update({
       where: { id: userId },
-      data: { status: UserStatus.REJECTED },
+      data: { status: 'REJECTED' },
       select: { id: true, email: true, role: true, status: true },
     });
   }

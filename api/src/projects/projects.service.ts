@@ -500,12 +500,15 @@ export class ProjectsService {
       where: { id: { in: projectIds } },
       select: { id: true, name: true, userId: true },
     });
-    const projectById = new Map(projects.map((p) => [p.id, p]));
+    const projectById: Record<number, { name: string | null; userId: number }> = {};
+    projects.forEach((p) => {
+      projectById[p.id] = { name: p.name ?? null, userId: p.userId };
+    });
 
     return mine.map((o) => ({
       ...o,
-      projectName: projectById.get(o.projectId)?.name ?? null,
-      investorId: projectById.get(o.projectId)?.userId ?? null,
+      projectName: projectById[o.projectId]?.name ?? null,
+      investorId: projectById[o.projectId]?.userId ?? null,
     }));
   }
 

@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { $Enums, Prisma } from '@prisma/client';
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { PrismaService } from '../prisma/prisma.service';
 import * as bcrypt from 'bcryptjs';
 import { createHash, randomBytes } from 'crypto';
@@ -15,7 +15,7 @@ type RegisterBody = {
   phone?: string;
   password: string;
 
-  role: $Enums.UserRole;
+  role: 'admin' | 'investor' | 'contractor';
 
   investorCompanyName?: string;
   contactName?: string;
@@ -23,7 +23,7 @@ type RegisterBody = {
   officialCompanyEmail?: string;
   investmentSummary?: string;
 
-  contractorType?: $Enums.ContractorType;
+  contractorType?: 'TAXED' | 'UNTAXED';
   contractorCompanyName?: string;
   ownerName?: string;
   ownerPhotoUrl?: string;
@@ -64,7 +64,7 @@ export class AuthService {
       const accountEmail = email || `phone_${phone}@phone.local`;
 
       const hashed = await bcrypt.hash(body.password, 10);
-      const status: $Enums.UserStatus = 'APPROVED';
+      const status: 'PENDING' | 'APPROVED' | 'REJECTED' = 'APPROVED';
 
       const user = await prismaUser.create({
         data: {
@@ -108,7 +108,7 @@ export class AuthService {
       };
     } catch (e) {
       if (
-        e instanceof Prisma.PrismaClientKnownRequestError &&
+        e instanceof PrismaClientKnownRequestError &&
         (e.code === 'P2022' || e.code === 'P2021')
       ) {
         throw new BadRequestException(
@@ -135,7 +135,7 @@ export class AuthService {
     const ok = await bcrypt.compare(password, user.password);
     if (!ok) throw new UnauthorizedException('Giris bilgileri hatali');
 
-    let contractorType: $Enums.ContractorType | undefined;
+    let contractorType: 'TAXED' | 'UNTAXED' | undefined;
     if (user.role === 'contractor') {
       const profile = await this.prisma.contractorProfile.findUnique({
         where: { userId: user.id },
