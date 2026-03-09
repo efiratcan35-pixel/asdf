@@ -4,6 +4,7 @@ import { OrbitControls, PerspectiveCamera } from '@react-three/drei';
 import { Canvas } from '@react-three/fiber';
 import { useEffect, useMemo, useState } from 'react';
 import * as THREE from 'three';
+import { useRouter } from 'next/navigation';
 import TopBar from '@/components/TopBar';
 import { useAuth } from '@/lib/auth';
 import Link from 'next/link';
@@ -410,6 +411,7 @@ function BuildingModel({
 }
 
 export default function HomePage() {
+  const router = useRouter();
   const { token, user } = useAuth();
   const [buildingType, setBuildingType] = useState<BuildingType>('STEEL_FULL');
   const [lengthM, setLengthM] = useState(60);
@@ -664,7 +666,9 @@ export default function HomePage() {
                 <button
                   type="button"
                   className="rounded border px-2 py-1 text-xs"
-                  onClick={() => setPopupMsg('daha fazla proje görmek için lütfen üye olun')}
+                  onClick={() =>
+                    user ? router.push('/market-jobs') : setPopupMsg('daha fazla proje görmek için lütfen üye olun')
+                  }
                 >
                   Daha fazla proje
                 </button>
@@ -704,7 +708,11 @@ export default function HomePage() {
                 <button
                   type="button"
                   className="rounded border px-2 py-1 text-xs"
-                  onClick={() => setPopupMsg('daha fazla firma görmek için lütfen üye olun')}
+                  onClick={() =>
+                    user
+                      ? router.push('/market-suppliers')
+                      : setPopupMsg('daha fazla firma görmek için lütfen üye olun')
+                  }
                 >
                   Daha fazla firma
                 </button>
