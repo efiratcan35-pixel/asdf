@@ -27,6 +27,7 @@ type RegisterBody = {
   contractorCompanyName?: string;
   ownerName?: string;
   ownerPhotoUrl?: string;
+  isDualMember?: boolean;
 };
 
 type RefInput = {
@@ -73,11 +74,12 @@ export class AuthService {
           password: hashed,
           role: body.role,
           status,
+          isDualMember: Boolean(body.isDualMember),
         },
-        select: { id: true, email: true, phone: true, role: true, status: true, createdAt: true },
+        select: { id: true, email: true, phone: true, role: true, status: true, isDualMember: true, createdAt: true },
       });
 
-      if (body.role === 'investor') {
+      if (body.role === 'investor' || body.isDualMember) {
         await this.prisma.investorProfile.create({
           data: {
             userId: user.id,
@@ -150,6 +152,7 @@ export class AuthService {
       phone: user.phone,
       role: user.role,
       status: user.status,
+      isDualMember: Boolean(user.isDualMember),
       contractorType,
     };
     setUserLastLogin(user.id, new Date().toISOString());
@@ -305,9 +308,9 @@ export class AuthService {
   async listMarketContractors(requesterUserId: number) {
     const requester = await this.prisma.user.findUnique({
       where: { id: requesterUserId },
-      select: { role: true },
+      select: { role: true, isDualMember: true },
     });
-    if (!requester || requester.role !== 'investor') {
+    if (!requester || (requester.role !== 'investor' && !requester.isDualMember)) {
       throw new BadRequestException('Bu listeye sadece investor erisebilir');
     }
 
@@ -364,9 +367,9 @@ export class AuthService {
   async getMarketContractorDetail(requesterUserId: number, contractorUserId: number) {
     const requester = await this.prisma.user.findUnique({
       where: { id: requesterUserId },
-      select: { role: true },
+      select: { role: true, isDualMember: true },
     });
-    if (!requester || requester.role !== 'investor') {
+    if (!requester || (requester.role !== 'investor' && !requester.isDualMember)) {
       throw new BadRequestException('Bu sayfaya sadece investor erisebilir');
     }
 

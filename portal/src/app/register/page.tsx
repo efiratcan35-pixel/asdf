@@ -9,7 +9,7 @@ const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? 'http://localhost:3000';
 
 type UserRole = 'investor' | 'contractor';
 type ContractorType = 'TAXED' | 'UNTAXED';
-type MembershipType = 'INVESTOR' | 'CONTRACTOR_TAXED' | 'SUBCONTRACTOR_UNTAXED';
+type MembershipType = 'INVESTOR' | 'CONTRACTOR_TAXED' | 'SUBCONTRACTOR_UNTAXED' | 'INVESTOR_AND_CONTRACTOR';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -39,6 +39,9 @@ export default function RegisterPage() {
     if (membershipType === 'INVESTOR') {
       return 'Yatirimci profili olusturulur.';
     }
+    if (membershipType === 'INVESTOR_AND_CONTRACTOR') {
+      return 'Hem yatirimci hem uygulamaci haklariyla profil olusturulur.';
+    }
     if (membershipType === 'CONTRACTOR_TAXED') {
       return 'Vergi levhali yuklenici profili olusturuluyor.';
     }
@@ -54,7 +57,8 @@ export default function RegisterPage() {
     try {
       const role: UserRole = membershipType === 'INVESTOR' ? 'investor' : 'contractor';
       const contractorType: ContractorType =
-        membershipType === 'CONTRACTOR_TAXED' ? 'TAXED' : 'UNTAXED';
+        membershipType === 'SUBCONTRACTOR_UNTAXED' ? 'UNTAXED' : 'TAXED';
+      const isDualMember = membershipType === 'INVESTOR_AND_CONTRACTOR';
 
       if (membershipType === 'INVESTOR') {
         if (!officialCompanyEmail.trim()) {
@@ -88,6 +92,7 @@ export default function RegisterPage() {
         body.contractorCompanyName = contractorCompanyName || undefined;
         body.ownerName = ownerName || undefined;
         body.ownerPhotoUrl = ownerPhotoUrl || undefined;
+        body.isDualMember = isDualMember;
       }
 
       const res = await fetch(`${API_BASE}/auth/register`, {
@@ -144,6 +149,7 @@ export default function RegisterPage() {
                 <option value="INVESTOR">1) Yatirimci</option>
                 <option value="CONTRACTOR_TAXED">2) Yuklenici - Vergi levhali</option>
                 <option value="SUBCONTRACTOR_UNTAXED">3) Taseron - Vergi levhasiz</option>
+                <option value="INVESTOR_AND_CONTRACTOR">4) Hem yatirimci hem uygulamaci</option>
               </select>
             </div>
           </div>

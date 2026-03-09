@@ -112,6 +112,7 @@ model User {
   phone     String?  @unique
   password  String
   createdAt DateTime @default(now())
+  isDualMember Boolean @default(false)
 
   // ✅ güncelle
   role      UserRole   @default(contractor)

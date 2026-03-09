@@ -129,7 +129,7 @@ export default function TopBar() {
                 </button>
               )}
 
-              {user.role === 'investor' && (
+              {(user.role === 'investor' || user.isDualMember) && (
                 <Link href="/market-suppliers" className="rounded-md border px-2 py-1 text-xs hover:bg-gray-50 sm:px-3 sm:py-1.5 sm:text-sm">
                   <span className="sm:hidden">Firmalar</span>
                   <span className="hidden sm:inline">Piyasadaki Firmalar / Ekipler</span>

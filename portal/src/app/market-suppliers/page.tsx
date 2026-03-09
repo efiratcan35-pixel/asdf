@@ -53,7 +53,10 @@ export default function MarketSuppliersPage() {
   const [chatError, setChatError] = useState<string | null>(null);
   const [chatLastLoginAt, setChatLastLoginAt] = useState<string | null>(null);
 
-  const canUse = useMemo(() => user?.role === 'investor', [user?.role]);
+  const canUse = useMemo(
+    () => user?.role === 'investor' || Boolean(user?.isDualMember),
+    [user?.isDualMember, user?.role],
+  );
 
   useEffect(() => {
     if (!token || !canUse) return;
@@ -147,7 +150,7 @@ export default function MarketSuppliersPage() {
         <TopBar />
         <main className="mx-auto max-w-7xl p-6">
           <div className="rounded-xl border bg-white p-6 text-sm text-gray-700">
-            Bu sayfa yalnizca investor uyeler icin aciktir.
+            Bu sayfa investor veya hem yatirimci hem uygulamaci uyeler icin aciktir.
           </div>
         </main>
       </div>

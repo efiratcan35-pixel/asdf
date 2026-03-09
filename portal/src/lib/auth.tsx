@@ -13,6 +13,7 @@ export type AuthUser = {
   email: string;
   role: UserRole;
   status?: UserStatus;
+  isDualMember?: boolean;
   contractorType?: ContractorType;
   iat?: number;
   exp?: number;
@@ -44,6 +45,7 @@ type AuthContextValue = {
     contractorCompanyName?: string;
     ownerName?: string;
     ownerPhotoUrl?: string;
+    isDualMember?: boolean;
   }) => Promise<{ ok: true } | { ok: false; error: string }>;
   refreshMe: () => Promise<void>;
 };
