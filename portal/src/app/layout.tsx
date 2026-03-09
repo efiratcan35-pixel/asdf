@@ -1,5 +1,6 @@
 import './globals.css';
 import { AuthProvider } from '@/lib/auth';
+import SupportFooter from '@/components/SupportFooter';
 
 export const metadata = {
   title: 'Portal',
@@ -10,7 +11,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="tr">
       <body>
-        <AuthProvider>{children}</AuthProvider>
+        <AuthProvider>
+          {children}
+          <SupportFooter />
+        </AuthProvider>
       </body>
     </html>
   );
