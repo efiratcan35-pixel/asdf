@@ -240,6 +240,8 @@ export class AuthService {
   async updateContractorProfile(
     userId: number,
     body: {
+      companyName?: string;
+      ownerName?: string;
       about?: string;
       servicesText?: string;
       ownerPhotoUrl?: string;
@@ -252,6 +254,8 @@ export class AuthService {
     await this.prisma.contractorProfile.update({
       where: { userId },
       data: {
+        companyName: String(body.companyName ?? '').trim() || null,
+        ownerName: String(body.ownerName ?? '').trim() || null,
         about: body.about ?? null,
         servicesText: body.servicesText ?? null,
         ownerPhotoUrl: body.ownerPhotoUrl ?? profile.ownerPhotoUrl,

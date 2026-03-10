@@ -40,6 +40,8 @@ async function ensureFacePhoto(file: File) {
 export default function SubcontractorDashboardPage() {
   const { token, user } = useAuth();
 
+  const [companyName, setCompanyName] = useState('');
+  const [ownerName, setOwnerName] = useState('');
   const [about, setAbout] = useState('');
   const [profession, setProfession] = useState('');
   const [ownerPhotoUrl, setOwnerPhotoUrl] = useState('');
@@ -73,6 +75,8 @@ export default function SubcontractorDashboardPage() {
         if (!res.ok) throw new Error(data?.message ?? 'Profil getirilemedi');
         if (canceled) return;
 
+        setCompanyName(data.companyName ?? '');
+        setOwnerName(data.ownerName ?? '');
         setAbout(data.about ?? '');
         setProfession(data.servicesText ?? '');
         setOwnerPhotoUrl(data.ownerPhotoUrl ?? '');
@@ -220,6 +224,8 @@ export default function SubcontractorDashboardPage() {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
+          companyName,
+          ownerName,
           about,
           servicesText: profession,
           ownerPhotoUrl,
@@ -264,6 +270,26 @@ export default function SubcontractorDashboardPage() {
 
           <div className="mt-6 grid gap-6 lg:grid-cols-2">
             <div className="space-y-4">
+              <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                <div>
+                  <label className="text-sm font-medium">Firma adi</label>
+                  <input
+                    className="mt-1 w-full rounded-md border px-3 py-2 text-sm"
+                    value={companyName}
+                    onChange={(e) => setCompanyName(e.target.value)}
+                  />
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium">Firma sahibi adi</label>
+                  <input
+                    className="mt-1 w-full rounded-md border px-3 py-2 text-sm"
+                    value={ownerName}
+                    onChange={(e) => setOwnerName(e.target.value)}
+                  />
+                </div>
+              </div>
+
               <div>
                 <label className="text-sm font-medium">Profil fotografi (yuz net gorunmeli)</label>
                 <div className="mt-1">
