@@ -106,6 +106,12 @@ export class AuthController {
     return this.authService.listMarketContractors(req.user.sub);
   }
 
+  @UseGuards(JwtAuthGuard)
+  @Get('market-investors')
+  marketInvestors(@Req() req: any) {
+    return this.authService.listMarketInvestors(req.user.sub);
+  }
+
   @Get('public-market-contractors-preview')
   marketContractorsPreview(@Query('limit') limit?: string) {
     return this.authService.listPublicMarketContractorsPreview(Number(limit ?? 3));
@@ -120,6 +126,12 @@ export class AuthController {
   @Get('market-contractors/:userId')
   marketContractorDetail(@Req() req: any, @Param('userId') userId: string) {
     return this.authService.getMarketContractorDetail(req.user.sub, Number(userId));
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('market-investors/:userId')
+  marketInvestorDetail(@Req() req: any, @Param('userId') userId: string) {
+    return this.authService.getMarketInvestorDetail(req.user.sub, Number(userId));
   }
 
   @UseGuards(JwtAuthGuard)

@@ -314,8 +314,8 @@ export class AuthService {
       where: { id: requesterUserId },
       select: { role: true, isDualMember: true },
     });
-    if (!requester || (requester.role !== 'investor' && !requester.isDualMember)) {
-      throw new BadRequestException('Bu listeye sadece investor erisebilir');
+    if (!requester) {
+      throw new BadRequestException('Kullanici bulunamadi');
     }
 
     const profiles = await this.prisma.contractorProfile.findMany({
@@ -373,8 +373,8 @@ export class AuthService {
       where: { id: requesterUserId },
       select: { role: true, isDualMember: true },
     });
-    if (!requester || (requester.role !== 'investor' && !requester.isDualMember)) {
-      throw new BadRequestException('Bu sayfaya sadece investor erisebilir');
+    if (!requester) {
+      throw new BadRequestException('Kullanici bulunamadi');
     }
 
     const profile = await this.prisma.contractorProfile.findUnique({
@@ -473,6 +473,66 @@ export class AuthService {
         caption: m.caption ?? '',
         createdAt: m.createdAt,
       })),
+    };
+  }
+
+  async listMarketInvestors(requesterUserId: number) {
+    const requester = await this.prisma.user.findUnique({
+      where: { id: requesterUserId },
+      select: { id: true },
+    });
+    if (!requester) {
+      throw new BadRequestException('Kullanici bulunamadi');
+    }
+
+    const profiles = await this.prisma.investorProfile.findMany({
+      include: {
+        user: { select: { id: true, email: true } },
+      },
+      orderBy: { updatedAt: 'desc' },
+    });
+
+    return profiles
+      .filter((p) => !isUserHidden(p.userId))
+      .map((p) => ({
+        userId: p.userId,
+        email: p.user.email,
+        companyName: p.companyName ?? '',
+        contactName: p.contactName ?? '',
+        phone: p.phone ?? '',
+        officialCompanyEmail: p.officialCompanyEmail ?? '',
+        investmentSummary: p.investmentSummary ?? '',
+        marketAccessStatus: p.marketAccessStatus,
+      }));
+  }
+
+  async getMarketInvestorDetail(requesterUserId: number, investorUserId: number) {
+    const requester = await this.prisma.user.findUnique({
+      where: { id: requesterUserId },
+      select: { id: true },
+    });
+    if (!requester) {
+      throw new BadRequestException('Kullanici bulunamadi');
+    }
+
+    const profile = await this.prisma.investorProfile.findUnique({
+      where: { userId: investorUserId },
+      include: {
+        user: { select: { id: true, email: true } },
+      },
+    });
+    if (!profile) throw new BadRequestException('Investor bulunamadi');
+    if (isUserHidden(profile.userId)) throw new BadRequestException('Investor bulunamadi');
+
+    return {
+      userId: profile.userId,
+      email: profile.user.email,
+      companyName: profile.companyName ?? '',
+      contactName: profile.contactName ?? '',
+      phone: profile.phone ?? '',
+      officialCompanyEmail: profile.officialCompanyEmail ?? '',
+      investmentSummary: profile.investmentSummary ?? '',
+      marketAccessStatus: profile.marketAccessStatus,
     };
   }
 

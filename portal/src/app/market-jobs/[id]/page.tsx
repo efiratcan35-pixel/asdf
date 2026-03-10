@@ -95,7 +95,11 @@ export default function MarketJobDetailPage() {
   const [editingText, setEditingText] = useState('');
   const [previewPhoto, setPreviewPhoto] = useState<{ url: string; caption?: string | null } | null>(null);
 
-  const canSee = useMemo(() => user?.role === 'contractor', [user?.role]);
+  const canSee = useMemo(() => Boolean(user), [user]);
+  const canActAsContractor = useMemo(
+    () => user?.role === 'contractor' || Boolean(user?.isDualMember),
+    [user?.isDualMember, user?.role],
+  );
 
   useEffect(() => {
     if (!token || !canSee || !Number.isInteger(projectId)) return;
@@ -244,7 +248,7 @@ export default function MarketJobDetailPage() {
         <TopBar />
         <main className="mx-auto max-w-6xl p-6">
           <div className="rounded-xl border bg-white p-6 text-sm text-gray-700">
-            Bu sayfa yalnizca yuklenici ve taseron uyeler icin aciktir.
+            Bu sayfa giris yapan kullanicilar icin aciktir.
           </div>
         </main>
       </div>
@@ -295,9 +299,11 @@ export default function MarketJobDetailPage() {
                     Yatirimci: {project.investor?.email ?? '-'} • Butce: {formatTry(project.budgetTry)}
                   </div>
                 </div>
-                <button type="button" className="rounded border px-3 py-1.5 text-sm" onClick={openChat}>
-                  Yatirimciya Mesaj At
-                </button>
+                {canActAsContractor && (
+                  <button type="button" className="rounded border px-3 py-1.5 text-sm" onClick={openChat}>
+                    Yatirimciya Mesaj At
+                  </button>
+                )}
               </div>
 
               <div className="mt-4 grid gap-2 text-sm md:grid-cols-2">
@@ -356,7 +362,7 @@ export default function MarketJobDetailPage() {
           )}
         </section>
 
-        {chatOpen && project && (
+        {chatOpen && project && canActAsContractor && (
           <aside className="fixed right-2 top-20 z-50 w-[calc(100vw-1rem)] max-w-[360px] rounded-lg border bg-white p-3 shadow-xl">
             <div className="mb-2 flex items-center justify-between">
               <div>

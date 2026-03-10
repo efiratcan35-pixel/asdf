@@ -137,17 +137,24 @@ export default function TopBar() {
                 </button>
               )}
 
-              {(user.role === 'investor' || user.isDualMember) && (
+              {user && (
                 <Link href="/market-suppliers" className="rounded-md border px-2 py-1 text-xs hover:bg-gray-50 sm:px-3 sm:py-1.5 sm:text-sm">
                   <span className="sm:hidden">Firmalar</span>
                   <span className="hidden sm:inline">Piyasadaki Firmalar / Ekipler</span>
                 </Link>
               )}
 
-              {user.role === 'contractor' && (
+              {user && (
                 <Link href="/market-jobs" className="rounded-md border px-2 py-1 text-xs hover:bg-gray-50 sm:px-3 sm:py-1.5 sm:text-sm">
                   <span className="sm:hidden">Isler</span>
                   <span className="hidden sm:inline">Piyasadaki Isler</span>
+                </Link>
+              )}
+
+              {user && (
+                <Link href="/market-investors" className="rounded-md border px-2 py-1 text-xs hover:bg-gray-50 sm:px-3 sm:py-1.5 sm:text-sm">
+                  <span className="sm:hidden">Investorler</span>
+                  <span className="hidden sm:inline">Investorler</span>
                 </Link>
               )}
 

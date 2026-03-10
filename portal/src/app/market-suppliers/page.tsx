@@ -61,7 +61,8 @@ export default function MarketSuppliersPage() {
   const [editingMessageId, setEditingMessageId] = useState<number | null>(null);
   const [editingText, setEditingText] = useState('');
 
-  const canUse = useMemo(
+  const canUse = useMemo(() => Boolean(user), [user]);
+  const canMessageSupplier = useMemo(
     () => user?.role === 'investor' || Boolean(user?.isDualMember),
     [user?.isDualMember, user?.role],
   );
@@ -219,7 +220,7 @@ export default function MarketSuppliersPage() {
         <TopBar />
         <main className="mx-auto max-w-7xl p-6">
           <div className="rounded-xl border bg-white p-6 text-sm text-gray-700">
-            Bu sayfa investor veya hem yatirimci hem uygulamaci uyeler icin aciktir.
+            Bu sayfa giris yapan kullanicilar icin aciktir.
           </div>
         </main>
       </div>
@@ -295,15 +296,17 @@ export default function MarketSuppliersPage() {
                     />
                   </Link>
                 )}
-                <div className="mt-3">
-                  <button
-                    type="button"
-                    className="rounded border px-3 py-1 text-xs"
-                    onClick={() => openChat(s)}
-                  >
-                    Firmaya Mesaj At
-                  </button>
-                </div>
+                {canMessageSupplier && (
+                  <div className="mt-3">
+                    <button
+                      type="button"
+                      className="rounded border px-3 py-1 text-xs"
+                      onClick={() => openChat(s)}
+                    >
+                      Firmaya Mesaj At
+                    </button>
+                  </div>
+                )}
               </article>
             ))}
           </div>

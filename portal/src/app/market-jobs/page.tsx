@@ -100,7 +100,11 @@ export default function MarketJobsPage() {
   const [offerError, setOfferError] = useState<string | null>(null);
   const [previewPhoto, setPreviewPhoto] = useState<{ url: string; caption?: string | null } | null>(null);
 
-  const canSee = useMemo(() => user?.role === 'contractor', [user?.role]);
+  const canSee = useMemo(() => Boolean(user), [user]);
+  const canActAsContractor = useMemo(
+    () => user?.role === 'contractor' || Boolean(user?.isDualMember),
+    [user?.isDualMember, user?.role],
+  );
 
   useEffect(() => {
     if (!token || !canSee) return;
@@ -295,7 +299,7 @@ export default function MarketJobsPage() {
         <TopBar />
         <main className="mx-auto max-w-6xl p-6">
           <div className="rounded-xl border bg-white p-6 text-sm text-gray-700">
-            Bu sayfa yalnizca yuklenici ve taseron uyeler icin aciktir.
+            Bu sayfa giris yapan kullanicilar icin aciktir.
           </div>
         </main>
       </div>
@@ -386,12 +390,16 @@ export default function MarketJobsPage() {
                   <Link href={`/market-jobs/${p.id}`} className="rounded border px-3 py-1 text-xs">
                     Proje Detayi
                   </Link>
-                  <button type="button" className="rounded border px-3 py-1 text-xs" onClick={() => openInvestorChat(p)}>
-                    Yatirimciya Mesaj At
-                  </button>
-                  <button type="button" className="rounded border px-3 py-1 text-xs" onClick={() => openOfferModal(p)}>
-                    Teklif Ver
-                  </button>
+                  {canActAsContractor && (
+                    <>
+                      <button type="button" className="rounded border px-3 py-1 text-xs" onClick={() => openInvestorChat(p)}>
+                        Yatirimciya Mesaj At
+                      </button>
+                      <button type="button" className="rounded border px-3 py-1 text-xs" onClick={() => openOfferModal(p)}>
+                        Teklif Ver
+                      </button>
+                    </>
+                  )}
                 </div>
 
                 {is3DOpen && (
@@ -412,7 +420,7 @@ export default function MarketJobsPage() {
           })}
         </section>
 
-        {chatProject && (
+        {chatProject && canActAsContractor && (
           <aside className="fixed right-2 top-20 z-50 w-[calc(100vw-1rem)] max-w-[360px] rounded-lg border bg-white p-3 shadow-xl">
             <div className="mb-2 flex items-center justify-between">
               <div>
@@ -523,7 +531,7 @@ export default function MarketJobsPage() {
           </aside>
         )}
 
-        {offerProject && (
+        {offerProject && canActAsContractor && (
           <aside className="fixed left-1/2 top-20 z-50 w-[calc(100vw-1rem)] max-w-[420px] -translate-x-1/2 rounded-lg border bg-white p-3 sm:p-4 shadow-xl">
             <div className="mb-3 flex items-start justify-between gap-3">
               <div>
