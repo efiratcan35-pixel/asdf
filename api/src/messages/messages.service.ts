@@ -12,6 +12,7 @@ type StoredMessage = {
   text: string;
   createdAt: string;
   readBy?: number[];
+  updatedAt?: string;
 };
 
 const dataDir = join(process.cwd(), 'data');
@@ -106,6 +107,7 @@ export class MessagesService {
       text,
       createdAt: new Date().toISOString(),
       readBy: [fromUserId],
+      updatedAt: undefined,
     };
     items.push(msg);
     writeMessages(items);
@@ -282,5 +284,51 @@ export class MessagesService {
     });
     writeMessages(next);
     return { ok: true, deletedCount: items.length - next.length };
+  }
+
+  async updateMessage(userId: number, messageId: number, body: { text?: string }) {
+    if (!Number.isInteger(messageId) || messageId < 1) {
+      throw new BadRequestException('messageId gecersiz');
+    }
+    const text = String(body?.text ?? '').trim();
+    if (!text) {
+      throw new BadRequestException('Mesaj bos olamaz');
+    }
+
+    const items = readMessages();
+    const index = items.findIndex((m) => m.id === messageId);
+    if (index < 0) {
+      throw new BadRequestException('Mesaj bulunamadi');
+    }
+    if (items[index].fromUserId !== userId) {
+      throw new BadRequestException('Sadece gonderdiginiz mesaji duzenleyebilirsiniz');
+    }
+
+    items[index] = {
+      ...items[index],
+      text,
+      updatedAt: new Date().toISOString(),
+    };
+    writeMessages(items);
+    return items[index];
+  }
+
+  async deleteMessage(userId: number, messageId: number) {
+    if (!Number.isInteger(messageId) || messageId < 1) {
+      throw new BadRequestException('messageId gecersiz');
+    }
+
+    const items = readMessages();
+    const message = items.find((m) => m.id === messageId);
+    if (!message) {
+      throw new BadRequestException('Mesaj bulunamadi');
+    }
+    if (message.fromUserId !== userId) {
+      throw new BadRequestException('Sadece gonderdiginiz mesaji silebilirsiniz');
+    }
+
+    const next = items.filter((m) => m.id !== messageId);
+    writeMessages(next);
+    return { ok: true };
   }
 }
