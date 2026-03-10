@@ -75,12 +75,7 @@ export default function TopBar() {
           <span className="flex h-8 w-8 items-center justify-center rounded-md border border-gray-300 bg-gray-50 text-lg leading-none">
             ⌂
           </span>
-          <span className="leading-tight">
-            <span className="block text-[11px] font-medium uppercase tracking-[0.18em] text-gray-500">
-              Homepage
-            </span>
-            <span className="block text-base text-black">EFC Portal</span>
-          </span>
+          <span className="text-base text-black">EFC Portal</span>
         </Link>
 
         <div className="flex w-full flex-wrap items-center gap-1 sm:w-auto sm:gap-2">
