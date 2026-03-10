@@ -75,13 +75,18 @@ export class MessagesService {
 
     const sender = await this.prisma.user.findFirst({
       where: { id: fromUserId },
-      select: { id: true, role: true },
+      select: { id: true, role: true, isDualMember: true },
     });
     const receiver = await this.prisma.user.findFirst({
       where: { id: toUserId },
-      select: { id: true, role: true },
+      select: { id: true, role: true, isDualMember: true },
     });
     if (!sender || !receiver) throw new BadRequestException('Kullanici bulunamadi');
+
+    const senderActsAsInvestor = sender.role === 'investor' || sender.isDualMember;
+    const senderActsAsContractor = sender.role === 'contractor';
+    const receiverActsAsInvestor = receiver.role === 'investor' || receiver.isDualMember;
+    const receiverActsAsContractor = receiver.role === 'contractor';
 
     let isAllowed = false;
     if (projectId !== null) {
@@ -92,12 +97,12 @@ export class MessagesService {
       if (!project) throw new BadRequestException('Proje bulunamadi');
       const investorId = project.userId;
       isAllowed =
-        (sender.role === 'contractor' && receiver.id === investorId) ||
-        (sender.id === investorId && receiver.role === 'contractor');
+        (senderActsAsContractor && receiver.id === investorId) ||
+        (sender.id === investorId && receiverActsAsContractor);
     } else {
       isAllowed =
-        (sender.role === 'investor' && receiver.role === 'contractor') ||
-        (sender.role === 'contractor' && receiver.role === 'investor');
+        (senderActsAsInvestor && receiverActsAsContractor) ||
+        (senderActsAsContractor && receiverActsAsInvestor);
     }
 
     if (!isAllowed) {
