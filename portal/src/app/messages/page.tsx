@@ -28,6 +28,10 @@ type ChatMessage = {
   updatedAt?: string;
 };
 
+const CONTEXT_MENU_WIDTH = 140;
+const CONTEXT_MENU_HEIGHT = 96;
+const CONTEXT_MENU_MARGIN = 12;
+
 function formatDateTime(v: string) {
   const d = new Date(v);
   return d.toLocaleString('tr-TR', {
@@ -178,6 +182,28 @@ export default function MessagesPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selected?.projectId, selected?.otherUserId, token]);
 
+  function openMessageMenu(messageId: number, x: number, y: number) {
+    if (typeof window === 'undefined') {
+      setMenu({ messageId, x, y });
+      return;
+    }
+
+    const maxX = Math.max(
+      CONTEXT_MENU_MARGIN,
+      window.innerWidth - CONTEXT_MENU_WIDTH - CONTEXT_MENU_MARGIN,
+    );
+    const maxY = Math.max(
+      CONTEXT_MENU_MARGIN,
+      window.innerHeight - CONTEXT_MENU_HEIGHT - CONTEXT_MENU_MARGIN,
+    );
+
+    setMenu({
+      messageId,
+      x: Math.min(Math.max(CONTEXT_MENU_MARGIN, x), maxX),
+      y: Math.min(Math.max(CONTEXT_MENU_MARGIN, y), maxY),
+    });
+  }
+
   async function onSend(e: FormEvent) {
     e.preventDefault();
     if (!token || !selected || !text.trim()) return;
@@ -301,7 +327,7 @@ export default function MessagesPage() {
     <div className="min-h-screen bg-gray-100">
       {menu && (
         <div
-          className="fixed z-[90] min-w-[120px] rounded-md border bg-white p-1 shadow-lg"
+          className="fixed z-[90] w-[140px] max-w-[calc(100vw-24px)] rounded-md border bg-white p-1 shadow-lg"
           style={{ left: menu.x, top: menu.y }}
         >
           <button
@@ -405,7 +431,7 @@ export default function MessagesPage() {
                               onContextMenu={(e) => {
                                 if (!mine) return;
                                 e.preventDefault();
-                                setMenu({ messageId: m.id, x: e.clientX, y: e.clientY });
+                                openMessageMenu(m.id, e.clientX, e.clientY);
                               }}
                             >
                               {editingMessageId === m.id ? (
