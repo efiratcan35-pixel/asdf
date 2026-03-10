@@ -66,8 +66,21 @@ export default function TopBar() {
   return (
     <div className="sticky top-0 z-50 border-b bg-white/90 backdrop-blur">
       <div className="mx-auto flex max-w-7xl flex-col gap-2 px-3 py-2 sm:flex-row sm:items-center sm:justify-between sm:px-4 sm:py-3">
-        <Link href="/" className="font-semibold">
-          EFC Portal
+        <Link
+          href="/"
+          title="Ana sayfa"
+          aria-label="Ana sayfa"
+          className="inline-flex items-center gap-2 self-start rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-semibold shadow-sm transition hover:border-black hover:bg-gray-50"
+        >
+          <span className="flex h-8 w-8 items-center justify-center rounded-md border border-gray-300 bg-gray-50 text-lg leading-none">
+            ⌂
+          </span>
+          <span className="leading-tight">
+            <span className="block text-[11px] font-medium uppercase tracking-[0.18em] text-gray-500">
+              Homepage
+            </span>
+            <span className="block text-base text-black">EFC Portal</span>
+          </span>
         </Link>
 
         <div className="flex w-full flex-wrap items-center gap-1 sm:w-auto sm:gap-2">
