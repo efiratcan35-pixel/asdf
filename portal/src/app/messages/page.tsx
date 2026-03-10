@@ -407,9 +407,9 @@ export default function MessagesPage() {
                               }}
                             >
                               {editingMessageId === m.id ? (
-                                <div className="space-y-2">
+                                <div className="space-y-2 rounded bg-white p-2">
                                   <textarea
-                                    className="w-full rounded border px-2 py-1 text-sm text-black"
+                                    className="w-full rounded border bg-white px-2 py-1 text-sm text-black"
                                     rows={3}
                                     value={editingText}
                                     onChange={(e) => setEditingText(e.target.value)}
@@ -417,7 +417,7 @@ export default function MessagesPage() {
                                   <div className="flex justify-end gap-2">
                                     <button
                                       type="button"
-                                      className="rounded border px-2 py-1 text-xs text-black hover:bg-gray-50"
+                                      className="rounded border bg-white px-2 py-1 text-xs text-black hover:bg-gray-50"
                                       onClick={() => {
                                         setEditingMessageId(null);
                                         setEditingText('');
@@ -427,7 +427,7 @@ export default function MessagesPage() {
                                     </button>
                                     <button
                                       type="button"
-                                      className="rounded bg-white px-2 py-1 text-xs text-black hover:bg-gray-100"
+                                      className="rounded border bg-black px-2 py-1 text-xs text-white hover:opacity-90"
                                       onClick={() => void onSaveMessageEdit()}
                                     >
                                       Kaydet
