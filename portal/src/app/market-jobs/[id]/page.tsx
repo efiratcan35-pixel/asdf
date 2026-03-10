@@ -40,7 +40,12 @@ type ChatMessage = {
   text: string;
   createdAt: string;
   readBy?: number[];
+  updatedAt?: string;
 };
+
+const CONTEXT_MENU_WIDTH = 140;
+const CONTEXT_MENU_HEIGHT = 96;
+const CONTEXT_MENU_MARGIN = 12;
 
 function formatNum(v: number) {
   return new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 2 }).format(v);
@@ -85,6 +90,9 @@ export default function MarketJobDetailPage() {
   const [chatLoading, setChatLoading] = useState(false);
   const [chatError, setChatError] = useState<string | null>(null);
   const [chatLastLoginAt, setChatLastLoginAt] = useState<string | null>(null);
+  const [menu, setMenu] = useState<{ messageId: number; x: number; y: number } | null>(null);
+  const [editingMessageId, setEditingMessageId] = useState<number | null>(null);
+  const [editingText, setEditingText] = useState('');
   const [previewPhoto, setPreviewPhoto] = useState<{ url: string; caption?: string | null } | null>(null);
 
   const canSee = useMemo(() => user?.role === 'contractor', [user?.role]);
@@ -115,6 +123,27 @@ export default function MarketJobDetailPage() {
       canceled = true;
     };
   }, [token, canSee, projectId]);
+
+  useEffect(() => {
+    if (!menu) return;
+    const handleClose = () => setMenu(null);
+    window.addEventListener('click', handleClose);
+    return () => window.removeEventListener('click', handleClose);
+  }, [menu]);
+
+  function openMessageMenu(messageId: number, x: number, y: number) {
+    if (typeof window === 'undefined') {
+      setMenu({ messageId, x, y });
+      return;
+    }
+    const maxX = Math.max(CONTEXT_MENU_MARGIN, window.innerWidth - CONTEXT_MENU_WIDTH - CONTEXT_MENU_MARGIN);
+    const maxY = Math.max(CONTEXT_MENU_MARGIN, window.innerHeight - CONTEXT_MENU_HEIGHT - CONTEXT_MENU_MARGIN);
+    setMenu({
+      messageId,
+      x: Math.min(Math.max(CONTEXT_MENU_MARGIN, x), maxX),
+      y: Math.min(Math.max(CONTEXT_MENU_MARGIN, y), maxY),
+    });
+  }
 
   async function openChat() {
     if (!token || !project?.investor?.id) return;
@@ -169,6 +198,46 @@ export default function MarketJobDetailPage() {
     }
   }
 
+  async function onDeleteMessage(messageId: number) {
+    if (!token || !project) return;
+    const ok = window.confirm('Bu mesaj silinsin mi?');
+    if (!ok) return;
+    try {
+      const res = await fetch(`${API_BASE}/messages/${messageId}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data?.message ?? 'Mesaj silinemedi');
+      setMenu(null);
+      await openChat();
+    } catch (e: unknown) {
+      setChatError(e instanceof Error ? e.message : 'Mesaj silinemedi');
+    }
+  }
+
+  async function onSaveMessageEdit() {
+    if (!token || !project || !editingMessageId || !editingText.trim()) return;
+    try {
+      const res = await fetch(`${API_BASE}/messages/${editingMessageId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ text: editingText.trim() }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data?.message ?? 'Mesaj duzenlenemedi');
+      setEditingMessageId(null);
+      setEditingText('');
+      setMenu(null);
+      await openChat();
+    } catch (e: unknown) {
+      setChatError(e instanceof Error ? e.message : 'Mesaj duzenlenemedi');
+    }
+  }
+
   if (!canSee) {
     return (
       <div className="min-h-screen bg-gray-100">
@@ -184,6 +253,33 @@ export default function MarketJobDetailPage() {
 
   return (
     <div className="min-h-screen bg-gray-100">
+      {menu && (
+        <div
+          className="fixed z-[90] w-[140px] max-w-[calc(100vw-24px)] rounded-md border bg-white p-1 shadow-lg"
+          style={{ left: menu.x, top: menu.y }}
+        >
+          <button
+            type="button"
+            className="block w-full rounded px-3 py-2 text-left text-sm hover:bg-gray-50"
+            onClick={() => {
+              const msg = chatMessages.find((m) => m.id === menu.messageId);
+              if (!msg) return;
+              setEditingMessageId(msg.id);
+              setEditingText(msg.text);
+              setMenu(null);
+            }}
+          >
+            Duzenle
+          </button>
+          <button
+            type="button"
+            className="block w-full rounded px-3 py-2 text-left text-sm text-red-700 hover:bg-red-50"
+            onClick={() => void onDeleteMessage(menu.messageId)}
+          >
+            Sil
+          </button>
+        </div>
+      )}
       <TopBar />
       <main className="mx-auto max-w-7xl p-6">
         <section className="rounded-xl border bg-white p-6 shadow-sm">
@@ -291,10 +387,48 @@ export default function MarketJobDetailPage() {
                     );
                     return (
                       <div key={m.id} className={`flex ${mine ? 'justify-end' : 'justify-start'}`}>
-                        <div className={`max-w-[85%] rounded px-2 py-1 text-xs ${mine ? 'bg-black text-white' : 'bg-gray-100'}`}>
-                          <div>{m.text}</div>
+                        <div
+                          className={`max-w-[85%] rounded px-2 py-1 text-xs ${mine ? 'bg-black text-white' : 'bg-gray-100'}`}
+                          onContextMenu={(e) => {
+                            if (!mine) return;
+                            e.preventDefault();
+                            openMessageMenu(m.id, e.clientX, e.clientY);
+                          }}
+                        >
+                          {editingMessageId === m.id ? (
+                            <div className="space-y-2 rounded bg-white p-2">
+                              <textarea
+                                className="w-full rounded border bg-white px-2 py-1 text-sm text-black"
+                                rows={3}
+                                value={editingText}
+                                onChange={(e) => setEditingText(e.target.value)}
+                              />
+                              <div className="flex justify-end gap-2">
+                                <button
+                                  type="button"
+                                  className="rounded border bg-white px-2 py-1 text-xs text-black hover:bg-gray-50"
+                                  onClick={() => {
+                                    setEditingMessageId(null);
+                                    setEditingText('');
+                                  }}
+                                >
+                                  Iptal
+                                </button>
+                                <button
+                                  type="button"
+                                  className="rounded border bg-black px-2 py-1 text-xs text-white hover:opacity-90"
+                                  onClick={() => void onSaveMessageEdit()}
+                                >
+                                  Kaydet
+                                </button>
+                              </div>
+                            </div>
+                          ) : (
+                            <div>{m.text}</div>
+                          )}
                           <div className={`mt-1 flex items-center justify-end gap-1 text-[10px] ${mine ? 'text-gray-200' : 'text-gray-500'}`}>
                             <span>{formatDateTime(m.createdAt)}</span>
+                            {Boolean(m.updatedAt) && <span>(duzenlendi)</span>}
                             {mine && <span className={isReadByOther ? 'text-sky-400' : 'text-gray-300'}>{isReadByOther ? '✓✓' : '✓'}</span>}
                           </div>
                         </div>
