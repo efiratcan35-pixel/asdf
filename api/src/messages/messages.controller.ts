@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Req, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { MessagesService } from './messages.service';
 
@@ -45,5 +45,10 @@ export class MessagesController {
   @Post('mark-read-conversation')
   markReadConversation(@Req() req: any, @Body() body: any) {
     return this.messagesService.markReadConversation(req.user.sub, body);
+  }
+
+  @Delete('conversation')
+  deleteConversation(@Req() req: any, @Body() body: any) {
+    return this.messagesService.deleteConversation(req.user.sub, body);
   }
 }

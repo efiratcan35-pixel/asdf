@@ -255,4 +255,32 @@ export class MessagesService {
     writeMessages(next);
     return { ok: true };
   }
+
+  async deleteConversation(
+    userId: number,
+    body: { projectId?: number | null; otherUserId?: number },
+  ) {
+    const otherUserId = Number(body.otherUserId);
+    if (!Number.isInteger(otherUserId) || otherUserId < 1) {
+      throw new BadRequestException('otherUserId gecersiz');
+    }
+    const projectId =
+      typeof body.projectId === 'undefined' || body.projectId === null || body.projectId === ('' as any)
+        ? null
+        : Number(body.projectId);
+    if (projectId !== null && (!Number.isInteger(projectId) || projectId < 1)) {
+      throw new BadRequestException('projectId gecersiz');
+    }
+
+    const items = readMessages();
+    const next = items.filter((m) => {
+      const sameConversation =
+        m.projectId === projectId &&
+        ((m.fromUserId === userId && m.toUserId === otherUserId) ||
+          (m.fromUserId === otherUserId && m.toUserId === userId));
+      return !sameConversation;
+    });
+    writeMessages(next);
+    return { ok: true, deletedCount: items.length - next.length };
+  }
 }

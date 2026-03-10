@@ -193,6 +193,39 @@ export default function MessagesPage() {
     }
   }
 
+  async function onDeleteConversation(item: ConversationItem) {
+    if (!token) return;
+    const ok = window.confirm('Bu mesaj gecmisi silinsin mi?');
+    if (!ok) return;
+
+    try {
+      const res = await fetch(`${API_BASE}/messages/conversation`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          projectId: item.projectId,
+          otherUserId: item.otherUserId,
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data?.message ?? 'Mesaj gecmisi silinemedi');
+
+      if (
+        selected?.projectId === item.projectId &&
+        selected?.otherUserId === item.otherUserId
+      ) {
+        setSelected(null);
+        setMessages([]);
+      }
+      await loadConversations();
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : 'Mesaj gecmisi silinemedi');
+    }
+  }
+
   if (!canUse) {
     return (
       <div className="min-h-screen bg-gray-100">
@@ -216,10 +249,8 @@ export default function MessagesPage() {
             {loading && <div className="mt-2 text-sm text-gray-500">Yukleniyor...</div>}
             <div className="mt-3 space-y-2">
               {items.map((it) => (
-                <button
+                <div
                   key={`${it.projectId}-${it.otherUserId}`}
-                  type="button"
-                  onClick={() => setSelected(it)}
                   className={`w-full rounded border p-2 text-left text-sm ${
                     selected?.projectId === it.projectId && selected?.otherUserId === it.otherUserId
                       ? 'border-black'
@@ -228,18 +259,33 @@ export default function MessagesPage() {
                         : ''
                   }`}
                 >
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="font-medium">{it.project?.name ?? 'Genel Sohbet'}</div>
-                    {it.unreadCount > 0 && (
-                      <span className="rounded bg-green-600 px-1.5 py-0.5 text-[11px] text-white">
-                        ({it.unreadCount})
-                      </span>
-                    )}
+                  <div className="flex items-start justify-between gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setSelected(it)}
+                      className="min-w-0 flex-1 text-left"
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="font-medium">{it.project?.name ?? 'Genel Sohbet'}</div>
+                        {it.unreadCount > 0 && (
+                          <span className="rounded bg-green-600 px-1.5 py-0.5 text-[11px] text-white">
+                            ({it.unreadCount})
+                          </span>
+                        )}
+                      </div>
+                      <div className="text-xs text-gray-600">{it.otherUser?.email ?? '-'}</div>
+                      <div className="mt-1 line-clamp-1 text-xs text-gray-500">{it.lastMessage}</div>
+                      <div className="mt-1 text-[11px] text-gray-500">{formatDateTime(it.lastMessageAt)}</div>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => void onDeleteConversation(it)}
+                      className="shrink-0 rounded border border-red-300 px-2 py-1 text-[11px] text-red-700 hover:bg-red-50"
+                    >
+                      Sil
+                    </button>
                   </div>
-                  <div className="text-xs text-gray-600">{it.otherUser?.email ?? '-'}</div>
-                  <div className="mt-1 line-clamp-1 text-xs text-gray-500">{it.lastMessage}</div>
-                  <div className="mt-1 text-[11px] text-gray-500">{formatDateTime(it.lastMessageAt)}</div>
-                </button>
+                </div>
               ))}
             </div>
           </section>
