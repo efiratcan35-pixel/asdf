@@ -208,6 +208,7 @@ export default function MessagesPage() {
     if (!token) return;
     const ok = window.confirm('Bu mesaj gecmisi silinsin mi?');
     if (!ok) return;
+    const deleteForBoth = window.confirm('Mesaj gecmisi karsi taraf icin de silinsin mi?');
 
     try {
       const res = await fetch(`${API_BASE}/messages/conversation`, {
@@ -219,6 +220,7 @@ export default function MessagesPage() {
         body: JSON.stringify({
           projectId: item.projectId,
           otherUserId: item.otherUserId,
+          deleteForBoth,
         }),
       });
       const data = await res.json().catch(() => ({}));

@@ -12,6 +12,7 @@ type StoredMessage = {
   text: string;
   createdAt: string;
   readBy?: number[];
+  deletedFor?: number[];
   updatedAt?: string;
 };
 
@@ -30,6 +31,7 @@ function readMessages(): StoredMessage[] {
     return rows.map((m) => ({
       ...m,
       readBy: Array.isArray(m.readBy) ? m.readBy : [m.fromUserId],
+      deletedFor: Array.isArray(m.deletedFor) ? m.deletedFor : [],
     }));
   } catch {
     return [];
@@ -39,6 +41,10 @@ function readMessages(): StoredMessage[] {
 function writeMessages(items: StoredMessage[]) {
   ensureMessagesFile();
   writeFileSync(messagesFile, JSON.stringify(items, null, 2), 'utf-8');
+}
+
+function isVisibleToUser(message: StoredMessage, userId: number) {
+  return !(message.deletedFor ?? []).includes(userId);
 }
 
 @Injectable()
@@ -107,6 +113,7 @@ export class MessagesService {
       text,
       createdAt: new Date().toISOString(),
       readBy: [fromUserId],
+      deletedFor: [],
       updatedAt: undefined,
     };
     items.push(msg);
@@ -117,6 +124,7 @@ export class MessagesService {
   async forProject(userId: number, projectId: number, otherUserId: number) {
     const items = readMessages();
     const list = items
+      .filter((m) => isVisibleToUser(m, userId))
       .filter((m) => m.projectId === projectId)
       .filter(
         (m) =>
@@ -130,6 +138,7 @@ export class MessagesService {
   async direct(userId: number, otherUserId: number) {
     const items = readMessages();
     const list = items
+      .filter((m) => isVisibleToUser(m, userId))
       .filter((m) => m.projectId === null)
       .filter(
         (m) =>
@@ -141,7 +150,9 @@ export class MessagesService {
   }
 
   async mine(userId: number) {
-    const items = readMessages().filter((m) => m.fromUserId === userId || m.toUserId === userId);
+    const items = readMessages().filter(
+      (m) => (m.fromUserId === userId || m.toUserId === userId) && isVisibleToUser(m, userId),
+    );
     const latestByKey = new Map<string, StoredMessage>();
     const unreadByKey = new Map<string, number>();
 
@@ -211,7 +222,10 @@ export class MessagesService {
 
   async unreadCount(userId: number) {
     const count = readMessages().filter(
-      (m) => m.toUserId === userId && !(m.readBy ?? []).includes(userId),
+      (m) =>
+        m.toUserId === userId &&
+        isVisibleToUser(m, userId) &&
+        !(m.readBy ?? []).includes(userId),
     ).length;
     return { unreadCount: count };
   }
@@ -219,6 +233,7 @@ export class MessagesService {
   async markReadAll(userId: number) {
     const items = readMessages();
     const next = items.map((m) => {
+      if (!isVisibleToUser(m, userId)) return m;
       if (m.toUserId !== userId) return m;
       if ((m.readBy ?? []).includes(userId)) return m;
       return { ...m, readBy: [...(m.readBy ?? []), userId] };
@@ -250,6 +265,7 @@ export class MessagesService {
         ((m.fromUserId === userId && m.toUserId === otherUserId) ||
           (m.fromUserId === otherUserId && m.toUserId === userId));
       if (!sameConversation) return m;
+      if (!isVisibleToUser(m, userId)) return m;
       if (m.toUserId !== userId) return m;
       if ((m.readBy ?? []).includes(userId)) return m;
       return { ...m, readBy: [...(m.readBy ?? []), userId] };
@@ -260,7 +276,7 @@ export class MessagesService {
 
   async deleteConversation(
     userId: number,
-    body: { projectId?: number | null; otherUserId?: number },
+    body: { projectId?: number | null; otherUserId?: number; deleteForBoth?: boolean },
   ) {
     const otherUserId = Number(body.otherUserId);
     if (!Number.isInteger(otherUserId) || otherUserId < 1) {
@@ -275,15 +291,24 @@ export class MessagesService {
     }
 
     const items = readMessages();
-    const next = items.filter((m) => {
-      const sameConversation =
-        m.projectId === projectId &&
-        ((m.fromUserId === userId && m.toUserId === otherUserId) ||
-          (m.fromUserId === otherUserId && m.toUserId === userId));
-      return !sameConversation;
-    });
+    const deleteForBoth = Boolean(body.deleteForBoth);
+    let deletedCount = 0;
+    const next = items
+      .map((m) => {
+        const sameConversation =
+          m.projectId === projectId &&
+          ((m.fromUserId === userId && m.toUserId === otherUserId) ||
+            (m.fromUserId === otherUserId && m.toUserId === userId));
+        if (!sameConversation) return m;
+        if (!isVisibleToUser(m, userId)) return m;
+        deletedCount += 1;
+        if (deleteForBoth) return null;
+        if ((m.deletedFor ?? []).includes(userId)) return m;
+        return { ...m, deletedFor: [...(m.deletedFor ?? []), userId] };
+      })
+      .filter((m): m is StoredMessage => m !== null);
     writeMessages(next);
-    return { ok: true, deletedCount: items.length - next.length };
+    return { ok: true, deletedCount, deleteForBoth };
   }
 
   async updateMessage(userId: number, messageId: number, body: { text?: string }) {
